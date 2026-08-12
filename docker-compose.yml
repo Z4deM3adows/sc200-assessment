@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  sc200-assessment:
+    build: .
+    container_name: sc200_master_engine
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+    restart: unless-stopped

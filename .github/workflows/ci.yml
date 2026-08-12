@@ -1,0 +1,43 @@
+name: SC-200 Question Bank & Server Verification CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Verify 500 Questions Bank Integrity
+      run: |
+        node -e "
+        const { SC200_QUESTIONS } = require('./sc200_questions.js');
+        if (!SC200_QUESTIONS || SC200_QUESTIONS.length !== 500) {
+          console.error('FAILED: Question count is not 500! Found: ' + (SC200_QUESTIONS ? SC200_QUESTIONS.length : 0));
+          process.exit(1);
+        }
+        console.log('SUCCESS: Verified 500 SC-200 questions!');
+        "
+
+    - name: Test Python SQLite Server Initialization
+      run: |
+        python -c "
+        import server
+        print('SUCCESS: Python server & SQLite database module loaded cleanly!')
+        "

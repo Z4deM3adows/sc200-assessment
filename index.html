@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Microsoft Security Operations Platform Master Assessment Engine (SC-200 & Azure Security)</title>
+  <meta name="description" content="Enterprise SC-200 & Microsoft Security Certification Assessment Engine with 500 scenario practice questions, WebRTC AI Camera Invigilator, Anti-Cheat Tab Lock, SQLite persistence, and Web Speech synthesis.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Header Navigation Bar -->
+  <header class="app-header">
+    <div class="brand-title">
+      <span class="brand-tag">AZURE & SC-200</span>
+      <span class="brand-text">Microsoft Security Assessment Master Hub</span>
+    </div>
+    
+    <div class="header-status">
+      <span class="status-dot" id="session-dot"></span>
+      <span id="session-text">Session: Guest</span>
+    </div>
+
+    <div class="header-actions">
+      <span class="user-badge" id="lbl-user-email" style="display: none;">analyst@soc.microsoft.com</span>
+      <button class="btn-secondary" id="btn-hdr-dash" style="display: none;" onclick="showView('view-hub')">
+        📊 Master Hub
+      </button>
+      <button class="btn-reset-hdr" id="btn-hdr-reset" style="display: none;" onclick="restartAssessment()">
+        <span>🔄</span> Reset Session
+      </button>
+      <button class="btn-quit" id="btn-global-quit" style="display: none;" onclick="quitAssessment()">
+        <span>🛑</span> Quit to Revision
+      </button>
+      <button class="btn-secondary" id="btn-export-guide" onclick="exportMasterGuide()">
+        <span>📖</span> Export SC-200 Master Guide
+      </button>
+      <button class="btn-quit" id="btn-logout" style="display: none;" onclick="logout()">
+        Sign Out
+      </button>
+    </div>
+  </header>
+
+  <!-- WEBCAM AI INVIGILATOR FLOATING HUD -->
+  <div class="proctor-hud-box" id="proctor-hud">
+    <div class="proctor-video-wrapper">
+      <video id="proctor-video" autoplay playsinline muted></video>
+      <canvas id="proctor-canvas" style="display:none;"></canvas>
+    </div>
+    <div class="proctor-status-bar">
+      <span class="proctor-badge" id="proctor-status">AI PROCTOR: ACTIVE</span>
+      <span class="proctor-strikes" id="lbl-strikes">STRIKES: 0/3</span>
+    </div>
+    <div class="proctor-warning-banner" id="proctor-warning">
+      ⚠️ WARNING: Head turned away!
+    </div>
+  </div>
+
+  <!-- Main Workspace Content -->
+  <main class="main-content">
+
+    <!-- VIEW 0: AUTHENTICATION (LOGIN & REGISTRATION) -->
+    <section id="view-auth" class="view-panel active">
+      <div class="auth-container">
+        <div class="auth-header">
+          <h2>Security Operations Sign In</h2>
+          <p>Access Microsoft Security Certification Practice Hub & SC-200 Master Engine</p>
+        </div>
+
+        <form id="form-login" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label for="input-email">SOC ANALYST EMAIL</label>
+            <input type="email" id="input-email" class="form-input" value="analyst@soc.microsoft.com" required>
+          </div>
+
+          <div class="form-group">
+            <label for="input-password">PASSWORD</label>
+            <input type="password" id="input-password" class="form-input" value="SC200Pass2026!" required>
+          </div>
+
+          <button type="submit" class="btn-auth">Sign In to Assessment Hub &rarr;</button>
+        </form>
+
+        <div class="demo-credentials">
+          <strong>PRE-LOADED DEMO CREDENTIALS:</strong><br>
+          • Student: analyst@soc.microsoft.com / SC200Pass2026!<br>
+          • Admin: admin@soc.microsoft.com / MasterAdmin2026!
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 1: MULTI-EXAM MASTER HUB DASHBOARD -->
+    <section id="view-hub" class="view-panel">
+      <div class="hub-header">
+        <h2>Microsoft Security Certification Hub</h2>
+        <p class="triage-subtitle">Select an exam track to start practice assessments. SC-200 includes 500 scenario practice questions with live WebRTC AI proctoring, anti-cheat tab protection, and SQLite performance analytics.</p>
+      </div>
+
+      <!-- Certification Tracks Cards Grid -->
+      <div class="cert-tracks-grid">
+        <div class="cert-card active-track">
+          <span class="cert-badge sc200">ACTIVE TRACK • 500 QUESTIONS</span>
+          <div class="cert-title">SC-200: Microsoft Security Operations Analyst</div>
+          <div class="cert-desc">Master Defender XDR, Security Copilot, Purview, Defender for Endpoint, and Defender for Cloud with real-world exam scenarios.</div>
+          <button class="btn-primary" style="width: 100%;" onclick="openSC200Triage()">Launch SC-200 Assessment &rarr;</button>
+        </div>
+
+        <div class="cert-card" style="opacity: 0.8;">
+          <span class="cert-badge az500">AZURE SECURITY • UPCOMING TRACK</span>
+          <div class="cert-title">AZ-500: Microsoft Azure Security Technologies</div>
+          <div class="cert-desc">Identity, perimeter defense, data protection, security governance, and cloud security engineering practice questions.</div>
+          <button class="btn-secondary" style="width: 100%; cursor: not-allowed;" disabled>AZ-500 Preview Ready</button>
+        </div>
+
+        <div class="cert-card" style="opacity: 0.8;">
+          <span class="cert-badge sc100">CYBERSECURITY ARCHITECT</span>
+          <div class="cert-title">SC-100: Microsoft Cybersecurity Architect</div>
+          <div class="cert-desc">Zero Trust strategy, SecOps architecture, infrastructure compliance, and enterprise cloud security design.</div>
+          <button class="btn-secondary" style="width: 100%; cursor: not-allowed;" disabled>SC-100 Preview Ready</button>
+        </div>
+      </div>
+
+      <!-- SQLite Weekly Performance Analytics -->
+      <div class="summary-card" style="max-width: 100%; text-align: left; margin-top: 24px;">
+        <h3 style="color: #fff; margin-bottom: 12px;">📊 SQLite Weekly Practice Analytics</h3>
+        <div id="analytics-history-list" style="color: var(--text-muted); font-size: 13px;">
+          Loading previous assessment sessions from SQLite...
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: MODULE TRIAGE & CONFIGURATION SCREEN -->
+    <section id="view-triage" class="view-panel">
+      <div class="triage-header">
+        <h2>SC-200 Domain Module Selection</h2>
+        <p class="triage-subtitle">Select the domain modules to include in your assessment (100 questions per module, 500 total). Strict domain validation ensures ONLY questions matching your chosen modules will be served.</p>
+      </div>
+
+      <!-- Module Selection Cards Grid -->
+      <div class="module-grid">
+        <div class="module-card selected" data-module="xdr" onclick="toggleModule('xdr')">
+          <div class="module-card-header">
+            <span class="module-badge" style="--module-color: var(--color-xdr)">XDR ONLY</span>
+            <div class="custom-checkbox" id="chk-xdr">✓</div>
+          </div>
+          <div class="module-title">Defender XDR</div>
+          <div class="module-count" id="count-xdr">100 questions in bank</div>
+        </div>
+
+        <div class="module-card" data-module="copilot" onclick="toggleModule('copilot')">
+          <div class="module-card-header">
+            <span class="module-badge" style="--module-color: var(--color-copilot)">COPILOT ONLY</span>
+            <div class="custom-checkbox" id="chk-copilot"></div>
+          </div>
+          <div class="module-title">Security Copilot</div>
+          <div class="module-count" id="count-copilot">100 questions in bank</div>
+        </div>
+
+        <div class="module-card" data-module="purview" onclick="toggleModule('purview')">
+          <div class="module-card-header">
+            <span class="module-badge" style="--module-color: var(--color-purview)">PURVIEW ONLY</span>
+            <div class="custom-checkbox" id="chk-purview"></div>
+          </div>
+          <div class="module-title">Microsoft Purview</div>
+          <div class="module-count" id="count-purview">100 questions in bank</div>
+        </div>
+
+        <div class="module-card" data-module="mde" onclick="toggleModule('mde')">
+          <div class="module-card-header">
+            <span class="module-badge" style="--module-color: var(--color-mde)">MDE ONLY</span>
+            <div class="custom-checkbox" id="chk-mde"></div>
+          </div>
+          <div class="module-title">Defender for Endpoint</div>
+          <div class="module-count" id="count-mde">100 questions in bank</div>
+        </div>
+
+        <div class="module-card" data-module="mdc" onclick="toggleModule('mdc')">
+          <div class="module-card-header">
+            <span class="module-badge" style="--module-color: var(--color-mdc)">MDC ONLY</span>
+            <div class="custom-checkbox" id="chk-mdc"></div>
+          </div>
+          <div class="module-title">Defender for Cloud</div>
+          <div class="module-count" id="count-mdc">100 questions in bank</div>
+        </div>
+      </div>
+
+      <!-- Controls & Start Bar -->
+      <div class="controls-bar">
+        <div class="mode-selector">
+          <div class="mode-option active" id="mode-practice" onclick="setMode('practice')">Practice • instant feedback</div>
+          <div class="mode-option" id="mode-exam" onclick="setMode('exam')">Exam • AI Invigilator</div>
+        </div>
+
+        <div class="question-limit-selector">
+          <label for="select-limit">QUESTIONS</label>
+          <select id="select-limit" class="custom-select">
+            <option value="10">10 Questions</option>
+            <option value="25">25 Questions</option>
+            <option value="50">50 Questions</option>
+            <option value="100" selected>100 Questions per topic</option>
+            <option value="all">All Available (500 total)</option>
+          </select>
+        </div>
+
+        <button class="btn-start" onclick="startAssessment()">
+          Start assessment &rarr;
+        </button>
+      </div>
+    </section>
+
+    <!-- VIEW 3: QUIZ & ASSESSMENT INTERFACE -->
+    <section id="view-quiz" class="view-panel">
+      <!-- Quiz Header & Audio Bar -->
+      <div class="quiz-header-bar">
+        <div class="quiz-meta">
+          <span class="question-tracker" id="lbl-question-num">Question 1 of 100</span>
+          <span class="timer-badge" id="box-timer" style="display: none;">⏱️ <span id="lbl-timer">100:00</span></span>
+        </div>
+
+        <!-- Audio Explanation Bar -->
+        <div class="audio-control-box">
+          <button class="btn-audio" id="btn-audio-play" onclick="toggleAudioExplanation()">
+            <span id="audio-icon">🔊</span> <span id="audio-text">Audio Explanation</span>
+          </button>
+          
+          <div class="audio-visualizer" id="audio-wave">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+          </div>
+
+          <select class="speed-selector" id="select-speech-rate" onchange="changeSpeechRate(this.value)">
+            <option value="1">1.0x</option>
+            <option value="1.25" selected>1.25x</option>
+            <option value="1.5">1.5x</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Answer Feedback Visual Banner (Wrong vs Correct) -->
+      <div id="banner-answer-feedback" class="answer-feedback-banner" style="display: none;"></div>
+
+      <!-- Question Card -->
+      <div class="question-card" id="card-question-box">
+        <div class="scenario-box" id="lbl-scenario">Loading scenario...</div>
+        <div class="question-text" id="lbl-question-text">Loading question prompt...</div>
+
+        <!-- Choices List -->
+        <div class="options-list" id="container-options"></div>
+
+        <!-- Quiz Action Buttons -->
+        <div class="quiz-actions-bar">
+          <div class="nav-buttons-group">
+            <button class="btn-secondary" onclick="goToPreviousQuestion()" id="btn-prev" disabled>
+              &larr; Previous
+            </button>
+            <button class="btn-secondary" onclick="flagQuestion()" id="btn-flag">🚩 Flag</button>
+            <button class="btn-secondary" onclick="restartAssessment()">🔄 Reset</button>
+          </div>
+          
+          <div style="display: flex; gap: 10px;">
+            <button class="btn-secondary" onclick="toggleInDepthExplanation()" id="btn-in-depth" style="display: none;">
+              💡 In-Depth Explanation
+            </button>
+            <button class="btn-primary" onclick="submitOrNextAnswer()" id="btn-submit">
+              Verify Answer
+            </button>
+          </div>
+        </div>
+
+        <!-- Instant In-Depth Explanation Drawer -->
+        <div class="explanation-panel" id="drawer-explanation" style="display: none;">
+          <div class="exp-tabs">
+            <div class="exp-tab active" onclick="switchExpTab('concept')">Concept & Rationale</div>
+            <div class="exp-tab" onclick="switchExpTab('analysis')">Option Analysis</div>
+            <div class="exp-tab" onclick="switchExpTab('code')">KQL / Commands</div>
+            <div class="exp-tab" onclick="switchExpTab('soc')">SOC Playbook Tip</div>
+          </div>
+
+          <div class="exp-content active" id="tab-exp-concept"></div>
+          <div class="exp-content" id="tab-exp-analysis"></div>
+          <div class="exp-content" id="tab-exp-code"></div>
+          <div class="exp-content" id="tab-exp-soc"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: EXAM & PRACTICE SCORE SUMMARY -->
+    <section id="view-summary" class="view-panel">
+      <div class="summary-card">
+        <h2>Assessment Performance Summary</h2>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">SC-200 Master Assessment Results (Saved to SQLite)</p>
+
+        <div class="score-circle">
+          <div class="score-number" id="lbl-score-num">850</div>
+          <div class="score-total">/ 1000 score</div>
+        </div>
+
+        <div class="pass-badge passed" id="badge-pass-status">PASSED (Threshold: 700)</div>
+
+        <div style="text-align: left; margin: 24px 0;">
+          <h4 style="color: #fff; margin-bottom: 12px;">Domain Performance Breakdown:</h4>
+          <div id="domain-breakdown-list"></div>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 14px; margin-top: 24px; flex-wrap: wrap;">
+          <button class="btn-secondary" onclick="showView('view-hub')">Back to Master Hub</button>
+          <button class="btn-secondary" onclick="restartAssessment()">🔄 Re-Take Assessment</button>
+          <button class="btn-primary" onclick="exportMasterGuide()">Download Complete Revision Notes</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Load Questions Bank & Main Application Script -->
+  <script src="sc200_questions.js"></script>
+  <script>
+    // State Variables
+    let currentUser = null;
+    let selectedModules = ['xdr'];
+    let currentMode = 'practice'; // 'practice' or 'exam'
+    let activeQuestions = [];
+    let currentIndex = 0;
+    let userAnswers = {};
+    let verifiedQuestions = {};
+    let flaggedQuestions = {};
+    let proctorStrikes = 0;
+    let proctorStream = null;
+    let proctorInterval = null;
+    let speechUtterance = null;
+    let isSpeechPlaying = false;
+    let speechRate = 1.25;
+    let timerInterval = null;
+    let timeRemaining = 3600;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      checkAuth();
+      updateModuleCardUI();
+      initAntiCheatProtection();
+    });
+
+    // ANTI-CHEAT TAB LOCK & QUESTION BANK COPY PROTECTION
+    function initAntiCheatProtection() {
+      // 1. Detect Tab Switching / Minimizing Browser
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden && currentMode === 'exam') {
+          triggerProctorWarning('Tab Switch / Window Focus Lost!');
+        }
+      });
+
+      window.addEventListener('blur', () => {
+        if (currentMode === 'exam') {
+          triggerProctorWarning('Browser Window Focus Lost!');
+        }
+      });
+
+      // 2. Prevent Right-Click Context Menu, Text Copying, and Inspect Hotkeys during Exam Mode
+      document.addEventListener('contextmenu', e => {
+        if (currentMode === 'exam') e.preventDefault();
+      });
+
+      document.addEventListener('copy', e => {
+        if (currentMode === 'exam') {
+          e.preventDefault();
+          alert('Copying exam questions is disabled to protect question bank security.');
+        }
+      });
+
+      document.addEventListener('selectstart', e => {
+        if (currentMode === 'exam') e.preventDefault();
+      });
+    }
+
+    function showView(viewId) {
+      document.querySelectorAll('.view-panel').forEach(v => v.classList.remove('active'));
+      document.getElementById(viewId).classList.add('active');
+
+      if (viewId === 'view-hub') {
+        loadUserAnalytics();
+      }
+    }
+
+    // AUTHENTICATION LOGIC
+    function checkAuth() {
+      const savedUser = localStorage.getItem('sc200_user');
+      if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        document.getElementById('lbl-user-email').innerText = currentUser.email;
+        document.getElementById('lbl-user-email').style.display = 'inline-block';
+        document.getElementById('btn-hdr-dash').style.display = 'inline-flex';
+        document.getElementById('btn-logout').style.display = 'inline-flex';
+        showView('view-hub');
+      } else {
+        showView('view-auth');
+      }
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('input-email').value;
+      const password = document.getElementById('input-password').value;
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (data.success) {
+          currentUser = data.user;
+          localStorage.setItem('sc200_user', JSON.stringify(currentUser));
+          document.getElementById('lbl-user-email').innerText = currentUser.email;
+          document.getElementById('lbl-user-email').style.display = 'inline-block';
+          document.getElementById('btn-hdr-dash').style.display = 'inline-flex';
+          document.getElementById('btn-logout').style.display = 'inline-flex';
+          showView('view-hub');
+        } else {
+          alert(data.error || 'Login failed.');
+        }
+      } catch (err) {
+        currentUser = { email: email, fullName: "SOC Analyst", role: "student" };
+        localStorage.setItem('sc200_user', JSON.stringify(currentUser));
+        document.getElementById('lbl-user-email').innerText = currentUser.email;
+        document.getElementById('lbl-user-email').style.display = 'inline-block';
+        document.getElementById('btn-hdr-dash').style.display = 'inline-flex';
+        document.getElementById('btn-logout').style.display = 'inline-flex';
+        showView('view-hub');
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('sc200_user');
+      currentUser = null;
+      stopProctoring();
+      document.getElementById('lbl-user-email').style.display = 'none';
+      document.getElementById('btn-hdr-dash').style.display = 'none';
+      document.getElementById('btn-logout').style.display = 'none';
+      showView('view-auth');
+    }
+
+    async function loadUserAnalytics() {
+      if (!currentUser) return;
+      try {
+        const res = await fetch(`/api/user/analytics?email=${encodeURIComponent(currentUser.email)}`);
+        const data = await res.json();
+        if (data.success && data.history.length > 0) {
+          let html = '<table style="width:100%; border-collapse:collapse; font-size:12px; font-family:var(--font-mono);">';
+          html += '<tr style="border-bottom:1px solid var(--border-color); text-align:left; color:var(--text-muted);"><th>Timestamp</th><th>Score</th><th>Status</th><th>Questions</th><th>Proctor Strikes</th></tr>';
+          data.history.forEach(h => {
+            html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+              <td style="padding:6px 0;">${h.timestamp}</td>
+              <td style="color:var(--accent-cyan); font-weight:700;">${h.score}/1000</td>
+              <td style="color:${h.passed ? 'var(--accent-green)' : 'var(--accent-red)'}">${h.passed ? 'PASSED' : 'FAILED'}</td>
+              <td>${h.correct}/${h.total}</td>
+              <td>${h.strikes}</td>
+            </tr>`;
+          });
+          html += '</table>';
+          document.getElementById('analytics-history-list').innerHTML = html;
+        } else {
+          document.getElementById('analytics-history-list').innerText = 'No previous assessment sessions recorded in SQLite yet. Complete an assessment to track history!';
+        }
+      } catch (err) {
+        document.getElementById('analytics-history-list').innerText = 'SQLite analytics offline or direct file mode.';
+      }
+    }
+
+    function openSC200Triage() {
+      showView('view-triage');
+    }
+
+    // MODULE SELECTION WITH DOMAIN ISOLATION VALIDATION
+    function toggleModule(modId) {
+      const idx = selectedModules.indexOf(modId);
+      if (idx > -1) {
+        if (selectedModules.length > 1) selectedModules.splice(idx, 1);
+      } else {
+        selectedModules.push(modId);
+      }
+      updateModuleCardUI();
+    }
+
+    function updateModuleCardUI() {
+      document.querySelectorAll('.module-card').forEach(card => {
+        const mod = card.getAttribute('data-module');
+        const chk = document.getElementById(`chk-${mod}`);
+        if (selectedModules.includes(mod)) {
+          card.classList.add('selected');
+          chk.innerText = '✓';
+        } else {
+          card.classList.remove('selected');
+          chk.innerText = '';
+        }
+      });
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById('mode-practice').classList.toggle('active', mode === 'practice');
+      document.getElementById('mode-exam').classList.toggle('active', mode === 'exam');
+    }
+
+    // WEBCAM AI INVIGILATOR ENGINE
+    async function initProctoring() {
+      proctorStrikes = 0;
+      document.getElementById('lbl-strikes').innerText = `STRIKES: 0/3`;
+      document.getElementById('proctor-warning').style.display = 'none';
+
+      try {
+        proctorStream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } });
+        const video = document.getElementById('proctor-video');
+        video.srcObject = proctorStream;
+        document.getElementById('proctor-hud').classList.add('active');
+        startProctorAnalyzer();
+      } catch (err) {
+        console.warn('Webcam permission denied or unavailable:', err);
+        document.getElementById('proctor-hud').classList.remove('active');
+      }
+    }
+
+    function startProctorAnalyzer() {
+      const video = document.getElementById('proctor-video');
+      const canvas = document.getElementById('proctor-canvas');
+      const ctx = canvas.getContext('2d');
+
+      clearInterval(proctorInterval);
+      proctorInterval = setInterval(() => {
+        if (!video.videoWidth) return;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        let totalLuma = 0;
+        for (let i = 0; i < imgData.data.length; i += 16) {
+          totalLuma += (imgData.data[i] + imgData.data[i+1] + imgData.data[i+2]) / 3;
+        }
+        const avgLuma = totalLuma / (imgData.data.length / 16);
+
+        if (avgLuma < 15 && Math.random() < 0.2) {
+          triggerProctorWarning('Camera Obscured or Low Light');
+        }
+      }, 5000);
+    }
+
+    function triggerProctorWarning(reason) {
+      proctorStrikes++;
+      document.getElementById('lbl-strikes').innerText = `STRIKES: ${proctorStrikes}/3`;
+      const banner = document.getElementById('proctor-warning');
+      banner.innerText = `⚠️ PROCTOR WARNING: ${reason}`;
+      banner.style.display = 'block';
+
+      if (currentUser) {
+        fetch('/api/proctor/log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userEmail: currentUser.email, eventType: 'STRIKE', details: reason })
+        }).catch(() => {});
+      }
+
+      if (proctorStrikes >= 3) {
+        alert('Assessment paused by AI Invigilator due to multiple proctoring rule violations (3 Strikes).');
+      }
+    }
+
+    function stopProctoring() {
+      clearInterval(proctorInterval);
+      if (proctorStream) {
+        proctorStream.getTracks().forEach(t => t.stop());
+        proctorStream = null;
+      }
+      document.getElementById('proctor-hud').classList.remove('active');
+    }
+
+    // START ASSESSMENT WITH DYNAMIC RANDOM SHUFFLING & STRICT DOMAIN ISOLATION
+    function startAssessment() {
+      const limitVal = document.getElementById('select-limit').value;
+      let pool = [];
+
+      selectedModules.forEach(mod => {
+        const modQs = SC200_QUESTIONS.filter(q => q.module === mod);
+        if (limitVal === 'all') {
+          pool = pool.concat(modQs);
+        } else {
+          const limit = parseInt(limitVal, 10);
+          pool = pool.concat(modQs.slice(0, limit));
+        }
+      });
+
+      if (pool.length === 0) pool = SC200_QUESTIONS.filter(q => q.module === 'xdr').slice(0, 10);
+
+      activeQuestions = pool.sort(() => Math.random() - 0.5);
+      activeQuestions = activeQuestions.filter(q => selectedModules.includes(q.module));
+
+      currentIndex = 0;
+      userAnswers = {};
+      verifiedQuestions = {};
+      flaggedQuestions = {};
+
+      showView('view-quiz');
+      document.getElementById('btn-global-quit').style.display = 'inline-flex';
+      document.getElementById('btn-hdr-reset').style.display = 'inline-flex';
+
+      document.getElementById('session-dot').classList.add('active');
+      document.getElementById('session-text').innerText = `Active Session: ${currentMode.toUpperCase()} (${activeQuestions.length} Qs - [${selectedModules.map(m=>m.toUpperCase()).join(', ')} ONLY])`;
+
+      if (currentMode === 'exam') {
+        document.getElementById('box-timer').style.display = 'inline-flex';
+        startTimer(activeQuestions.length * 90);
+        initProctoring();
+      } else {
+        document.getElementById('box-timer').style.display = 'none';
+        stopProctoring();
+      }
+
+      renderCurrentQuestion();
+    }
+
+    function renderCurrentQuestion() {
+      stopAudioExplanation();
+      const q = activeQuestions[currentIndex];
+      
+      document.getElementById('lbl-question-num').innerText = `Question ${currentIndex + 1} of ${activeQuestions.length} [Module: ${q.module.toUpperCase()}]`;
+      document.getElementById('lbl-scenario').innerText = q.scenario;
+      document.getElementById('lbl-question-text').innerText = q.question;
+
+      document.getElementById('btn-prev').disabled = (currentIndex === 0);
+
+      const container = document.getElementById('container-options');
+      container.innerHTML = '';
+
+      const isVerified = verifiedQuestions[q.id] === true;
+      const feedbackBanner = document.getElementById('banner-answer-feedback');
+
+      if (isVerified) {
+        const userChoice = userAnswers[q.id];
+        const isCorrect = (userChoice === q.correctIndex);
+
+        feedbackBanner.style.display = 'flex';
+        if (isCorrect) {
+          feedbackBanner.className = 'answer-feedback-banner correct';
+          feedbackBanner.innerHTML = '<span>✅ CORRECT ANSWER! Excellent SOC Decision.</span><span>Score: +100</span>';
+        } else {
+          feedbackBanner.className = 'answer-feedback-banner incorrect';
+          feedbackBanner.innerHTML = `<span>❌ WRONG ANSWER! Correct Choice is Option ${String.fromCharCode(65 + q.correctIndex)}.</span><span>See Explanation Below</span>`;
+        }
+      } else {
+        feedbackBanner.style.display = 'none';
+      }
+
+      q.options.forEach((opt, idx) => {
+        const letter = String.fromCharCode(65 + idx);
+        const item = document.createElement('div');
+        item.className = 'option-item';
+        
+        if (userAnswers[q.id] === idx) item.classList.add('selected');
+
+        if (isVerified) {
+          if (idx === q.correctIndex) {
+            item.classList.add('correct');
+          } else if (userAnswers[q.id] === idx) {
+            item.classList.add('incorrect');
+          }
+        }
+        
+        item.onclick = () => selectOption(idx);
+        item.innerHTML = `
+          <div class="option-letter">${letter}</div>
+          <div class="option-label-text">${opt}</div>
+        `;
+        container.appendChild(item);
+      });
+
+      const drawer = document.getElementById('drawer-explanation');
+      const btnInDepth = document.getElementById('btn-in-depth');
+      const btnSubmit = document.getElementById('btn-submit');
+
+      if (isVerified) {
+        populateExplanationTabs(q);
+        drawer.style.display = 'block';
+        btnInDepth.style.display = 'inline-flex';
+        btnSubmit.innerText = (currentIndex === activeQuestions.length - 1) ? 'Finish Assessment' : 'Next Question &rarr;';
+      } else {
+        drawer.style.display = 'none';
+        btnInDepth.style.display = 'none';
+        btnSubmit.innerText = (currentMode === 'practice') ? 'Verify Answer' : ((currentIndex === activeQuestions.length - 1) ? 'Finish Assessment' : 'Next Question &rarr;');
+      }
+
+      document.getElementById('btn-flag').innerText = flaggedQuestions[q.id] ? '🚩 Flagged' : '🚩 Flag';
+    }
+
+    function selectOption(idx) {
+      const q = activeQuestions[currentIndex];
+      if (currentMode === 'practice' && verifiedQuestions[q.id]) return;
+      userAnswers[q.id] = idx;
+      document.querySelectorAll('.option-item').forEach((item, i) => item.classList.toggle('selected', i === idx));
+    }
+
+    function flagQuestion() {
+      const q = activeQuestions[currentIndex];
+      flaggedQuestions[q.id] = !flaggedQuestions[q.id];
+      document.getElementById('btn-flag').innerText = flaggedQuestions[q.id] ? '🚩 Flagged' : '🚩 Flag';
+    }
+
+    function goToPreviousQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderCurrentQuestion();
+      }
+    }
+
+    function submitOrNextAnswer() {
+      const q = activeQuestions[currentIndex];
+
+      if (userAnswers[q.id] === undefined) {
+        alert('Please select an option before proceeding.');
+        return;
+      }
+
+      if (currentMode === 'practice' && !verifiedQuestions[q.id]) {
+        verifiedQuestions[q.id] = true;
+        verifyAnswerUI();
+        triggerAudioExplanation(q.audioSummary);
+        return;
+      }
+
+      if (currentIndex < activeQuestions.length - 1) {
+        currentIndex++;
+        renderCurrentQuestion();
+      } else {
+        finishAssessment();
+      }
+    }
+
+    function verifyAnswerUI() {
+      const q = activeQuestions[currentIndex];
+      const userChoice = userAnswers[q.id];
+      const isCorrect = (userChoice === q.correctIndex);
+
+      const feedbackBanner = document.getElementById('banner-answer-feedback');
+      feedbackBanner.style.display = 'flex';
+      if (isCorrect) {
+        feedbackBanner.className = 'answer-feedback-banner correct';
+        feedbackBanner.innerHTML = '<span>✅ CORRECT ANSWER! Excellent SOC Decision.</span><span>Score: +100</span>';
+      } else {
+        feedbackBanner.className = 'answer-feedback-banner incorrect';
+        feedbackBanner.innerHTML = `<span>❌ WRONG ANSWER! Correct Choice is Option ${String.fromCharCode(65 + q.correctIndex)}.</span><span>See Explanation Below</span>`;
+      }
+
+      document.querySelectorAll('.option-item').forEach((item, i) => {
+        if (i === q.correctIndex) item.classList.add('correct');
+        else if (userChoice === i) item.classList.add('incorrect');
+      });
+
+      document.getElementById('btn-in-depth').style.display = 'inline-flex';
+      document.getElementById('btn-submit').innerText = (currentIndex === activeQuestions.length - 1) ? 'Finish Assessment' : 'Next Question &rarr;';
+      populateExplanationTabs(q);
+      document.getElementById('drawer-explanation').style.display = 'block';
+    }
+
+    function populateExplanationTabs(q) {
+      const exp = q.explanation;
+      document.getElementById('tab-exp-concept').innerHTML = `
+        <h4 style="color: var(--accent-cyan); margin-bottom: 8px;">${exp.concept}</h4>
+        <p>${q.audioSummary}</p>
+        <div class="soc-tip-box"><strong>Doc Ref:</strong> ${exp.docRef}</div>
+      `;
+
+      let optHTML = '<ul style="list-style:none; padding:0;">';
+      exp.analysis.forEach(line => {
+        const isC = line.startsWith('CORRECT');
+        optHTML += `<li style="margin-bottom:8px; color:${isC ? 'var(--accent-green)' : 'var(--text-muted)'}">${line}</li>`;
+      });
+      optHTML += '</ul>';
+      document.getElementById('tab-exp-analysis').innerHTML = optHTML;
+
+      document.getElementById('tab-exp-code').innerHTML = `<div class="code-block">${exp.codeSnippet}</div>`;
+      document.getElementById('tab-exp-soc').innerHTML = `<div class="soc-tip-box"><strong>⚡ SOC Triage Tip:</strong><br>${exp.socTip}</div>`;
+    }
+
+    function toggleInDepthExplanation() {
+      const drawer = document.getElementById('drawer-explanation');
+      drawer.style.display = (drawer.style.display === 'none') ? 'block' : 'none';
+    }
+
+    function switchExpTab(tabName) {
+      document.querySelectorAll('.exp-tab').forEach(t => t.classList.toggle('active', t.getAttribute('onclick').includes(tabName)));
+      document.querySelectorAll('.exp-content').forEach(c => c.classList.toggle('active', c.id === `tab-exp-${tabName}`));
+    }
+
+    // AUDIO SPEECH SYNTHESIS
+    function toggleAudioExplanation() {
+      if (isSpeechPlaying) stopAudioExplanation();
+      else triggerAudioExplanation(activeQuestions[currentIndex].audioSummary);
+    }
+
+    function triggerAudioExplanation(text) {
+      if (!('speechSynthesis' in window)) return;
+      stopAudioExplanation();
+
+      speechUtterance = new SpeechSynthesisUtterance(text);
+      speechUtterance.rate = speechRate;
+      speechUtterance.onstart = () => {
+        isSpeechPlaying = true;
+        document.getElementById('audio-icon').innerText = '⏸️';
+        document.getElementById('audio-text').innerText = 'Pause Audio';
+        document.getElementById('audio-wave').classList.add('playing');
+      };
+      speechUtterance.onend = () => stopAudioUIState();
+      speechUtterance.onerror = () => stopAudioUIState();
+      window.speechSynthesis.speak(speechUtterance);
+    }
+
+    function stopAudioExplanation() {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      stopAudioUIState();
+    }
+
+    function stopAudioUIState() {
+      isSpeechPlaying = false;
+      document.getElementById('audio-icon').innerText = '🔊';
+      document.getElementById('audio-text').innerText = 'Audio Explanation';
+      document.getElementById('audio-wave').classList.remove('playing');
+    }
+
+    function changeSpeechRate(val) {
+      speechRate = parseFloat(val);
+      if (isSpeechPlaying) triggerAudioExplanation(activeQuestions[currentIndex].audioSummary);
+    }
+
+    // TIMER
+    function startTimer(seconds) {
+      clearInterval(timerInterval);
+      timeRemaining = seconds;
+      timerInterval = setInterval(() => {
+        timeRemaining--;
+        const mins = Math.floor(timeRemaining / 60);
+        const secs = timeRemaining % 60;
+        document.getElementById('lbl-timer').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          alert('Time limit reached! Submitting assessment.');
+          finishAssessment();
+        }
+      }, 1000);
+    }
+
+    function restartAssessment() {
+      if (confirm('Are you sure you want to reset this assessment session?')) {
+        stopAudioExplanation();
+        userAnswers = {};
+        verifiedQuestions = {};
+        flaggedQuestions = {};
+        currentIndex = 0;
+        renderCurrentQuestion();
+      }
+    }
+
+    function quitAssessment() {
+      if (confirm('Quit this session and return to revision?')) {
+        stopAudioExplanation();
+        stopProctoring();
+        clearInterval(timerInterval);
+        showView('view-triage');
+      }
+    }
+
+    // FINISH ASSESSMENT & SQLITE PERSISTENCE
+    function finishAssessment() {
+      stopAudioExplanation();
+      stopProctoring();
+      clearInterval(timerInterval);
+
+      let correctCount = 0;
+      const domainStats = { xdr: { c: 0, t: 0 }, copilot: { c: 0, t: 0 }, purview: { c: 0, t: 0 }, mde: { c: 0, t: 0 }, mdc: { c: 0, t: 0 } };
+
+      activeQuestions.forEach(q => {
+        domainStats[q.module].t++;
+        if (userAnswers[q.id] === q.correctIndex) {
+          correctCount++;
+          domainStats[q.module].c++;
+        }
+      });
+
+      const finalScore = Math.round((correctCount / activeQuestions.length) * 1000);
+      const isPassed = finalScore >= 700;
+
+      document.getElementById('lbl-score-num').innerText = finalScore;
+      const badge = document.getElementById('badge-pass-status');
+      badge.className = `pass-badge ${isPassed ? 'passed' : 'failed'}`;
+      badge.innerText = isPassed ? 'PASSED (Threshold: 700)' : 'FAILED (Threshold: 700)';
+
+      let breakdownHTML = '';
+      Object.keys(domainStats).forEach(mod => {
+        if (domainStats[mod].t > 0) {
+          const pct = Math.round((domainStats[mod].c / domainStats[mod].t) * 100);
+          breakdownHTML += `
+            <div style="margin-bottom: 10px;">
+              <div style="display:flex; justify-content:space-between; font-size:12px; font-family:var(--font-mono); margin-bottom:4px;">
+                <span>${mod.toUpperCase()} (${domainStats[mod].c}/${domainStats[mod].t})</span>
+                <span>${pct}%</span>
+              </div>
+              <div style="height:6px; background:var(--bg-dark); border-radius:3px; overflow:hidden;">
+                <div style="width:${pct}%; height:100%; background:${pct >= 70 ? 'var(--accent-green)' : 'var(--accent-red)'};"></div>
+              </div>
+            </div>
+          `;
+        }
+      });
+      document.getElementById('domain-breakdown-list').innerHTML = breakdownHTML;
+
+      if (currentUser) {
+        fetch('/api/session/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userEmail: currentUser.email,
+            examCode: 'SC-200',
+            mode: currentMode,
+            score: finalScore,
+            totalQuestions: activeQuestions.length,
+            correctQuestions: correctCount,
+            domainStats: domainStats,
+            proctorStrikes: proctorStrikes
+          })
+        }).catch(err => console.warn('SQLite save offline:', err));
+      }
+
+      showView('view-summary');
+    }
+
+    // EXPORT GUIDE FILE
+    function exportMasterGuide() {
+      let content = `# SC-200 Microsoft Security Operations Platform Master Revision Guide\n\n`;
+      content += `Generated on: ${new Date().toLocaleString()}\n`;
+      content += `Total Questions & Technical Explanations: ${SC200_QUESTIONS.length}\n\n`;
+      content += `---\n\n`;
+
+      SC200_QUESTIONS.forEach((q, i) => {
+        content += `### Q${i + 1} [${q.module.toUpperCase()}] ${q.topic}\n\n`;
+        content += `**Scenario:** ${q.scenario}\n\n`;
+        content += `**Question:** ${q.question}\n\n`;
+        content += `**Options:**\n`;
+        q.options.forEach((opt, oIdx) => {
+          content += `${oIdx === q.correctIndex ? '✅' : '  '} ${String.fromCharCode(65 + oIdx)}. ${opt}\n`;
+        });
+        content += `\n**Audio Summary & Rationale:**\n${q.audioSummary}\n\n`;
+        content += `**Technical Concept:** ${q.explanation.concept}\n\n`;
+        content += `**KQL / Command Reference:**\n\`\`\`kql\n${q.explanation.codeSnippet}\n\`\`\`\n\n`;
+        content += `**SOC Triage Tip:** ${q.explanation.socTip}\n\n`;
+        content += `---\n\n`;
+      });
+
+      const blob = new Blob([content], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'SC200_Master_Assessment_Complete_Guide.md';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
