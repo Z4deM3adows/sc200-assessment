@@ -21,6 +21,7 @@ def init_sqlite_db():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
+    # Users Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,6 +33,7 @@ def init_sqlite_db():
         )
     ''')
 
+    # Questions Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS questions (
             id TEXT PRIMARY KEY,
@@ -47,6 +49,7 @@ def init_sqlite_db():
         )
     ''')
 
+    # Practice Sessions Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS exam_sessions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -63,6 +66,25 @@ def init_sqlite_db():
         )
     ''')
 
+    # Pearson VUE Real Exam Simulation Table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS pearson_exams (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_email TEXT NOT NULL,
+            exam_code TEXT NOT NULL,
+            score INTEGER NOT NULL,
+            passed INTEGER NOT NULL,
+            total_questions INTEGER NOT NULL,
+            correct_questions INTEGER NOT NULL,
+            domain_stats TEXT NOT NULL,
+            user_answers TEXT NOT NULL,
+            proctor_strikes INTEGER DEFAULT 0,
+            time_spent_seconds INTEGER NOT NULL,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    # Proctor Logs Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS proctor_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -73,6 +95,7 @@ def init_sqlite_db():
         )
     ''')
 
+    # Default Users
     cursor.execute("SELECT COUNT(*) FROM users")
     if cursor.fetchone()[0] == 0:
         cursor.execute("INSERT INTO users (email, password_hash, full_name, role) VALUES (?, ?, ?, ?)",
@@ -81,6 +104,7 @@ def init_sqlite_db():
                        ("admin@soc.microsoft.com", hash_password("MasterAdmin2026!"), "SOC Lead Administrator", "admin"))
         print("[+] Created default user & admin accounts in SQLite.")
 
+    # Populate 500 questions from sc200_questions.js if empty
     cursor.execute("SELECT COUNT(*) FROM questions")
     if cursor.fetchone()[0] == 0:
         js_file = os.path.join(DIRECTORY, "sc200_questions.js")
@@ -209,7 +233,31 @@ class RESTHandler(http.server.SimpleHTTPRequestHandler):
             conn.commit()
             conn.close()
 
-            self._send_json({"success": True, "message": "Exam session saved to SQLite."})
+            self._send_json({"success": True, "message": "Practice session saved to SQLite."})
+            return
+
+        elif path == '/api/pearson/submit':
+            email = body.get('userEmail', 'guest@soc.microsoft.com')
+            exam_code = body.get('examCode', 'SC-200')
+            score = body.get('score', 0)
+            passed = 1 if score >= 700 else 0
+            total_q = body.get('totalQuestions', 0)
+            correct_q = body.get('correctQuestions', 0)
+            domain_stats = json.dumps(body.get('domainStats', {}))
+            user_answers = json.dumps(body.get('userAnswers', {}))
+            strikes = body.get('proctorStrikes', 0)
+            time_spent = body.get('timeSpentSeconds', 0)
+
+            conn = sqlite3.connect(DB_FILE)
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO pearson_exams (user_email, exam_code, score, passed, total_questions, correct_questions, domain_stats, user_answers, proctor_strikes, time_spent_seconds)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (email, exam_code, score, passed, total_q, correct_q, domain_stats, user_answers, strikes, time_spent))
+            conn.commit()
+            conn.close()
+
+            self._send_json({"success": True, "message": "Pearson VUE Exam Diagnostic saved to SQLite."})
             return
 
         elif path == '/api/proctor/log':
@@ -255,11 +303,31 @@ class RESTHandler(http.server.SimpleHTTPRequestHandler):
             self._send_json({"success": True, "history": history})
             return
 
+        elif path == '/api/pearson/history':
+            email = query.get('email', ['guest@soc.microsoft.com'])[0]
+            conn = sqlite3.connect(DB_FILE)
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT score, passed, total_questions, correct_questions, proctor_strikes, time_spent_seconds, timestamp
+                FROM pearson_exams WHERE user_email = ? ORDER BY id DESC LIMIT 10
+            ''', (email,))
+            rows = cursor.fetchall()
+            conn.close()
+
+            history = []
+            for r in rows:
+                history.append({
+                    "score": r[0], "passed": bool(r[1]), "total": r[2], "correct": r[3],
+                    "strikes": r[4], "timeSpent": r[5], "timestamp": r[6]
+                })
+
+            self._send_json({"success": True, "history": history})
+            return
+
         elif path == '/api/questions/random':
             modules = query.get('modules', ['xdr'])
             limit = int(query.get('limit', ['10'])[0])
             
-            # STRICT DOMAIN ISOLATION AT DATABASE LEVEL
             placeholders = ','.join(['?'] * len(modules))
             conn = sqlite3.connect(DB_FILE)
             cursor = conn.cursor()
@@ -290,6 +358,7 @@ print(f"========================================================================
 print(f"      Microsoft Security Operations Platform Master Assessment (SC-200)   ")
 print(f"==========================================================================")
 print(f"[+] SQLite Database initialized at: {DB_FILE}")
+print(f"[+] Pearson VUE Real Exam Simulation API Active")
 print(f"[+] Starting local HTTP server on http://localhost:{PORT}")
 print(f"[+] Default User:  analyst@soc.microsoft.com  / SC200Pass2026!")
 print(f"[+] Default Admin: admin@soc.microsoft.com    / MasterAdmin2026!")

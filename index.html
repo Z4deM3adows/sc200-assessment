@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Microsoft Security Operations Platform Master Assessment Engine (SC-200 & Azure Security)</title>
-  <meta name="description" content="Enterprise SC-200 & Microsoft Security Certification Assessment Engine with 500 scenario practice questions, WebRTC AI Camera Invigilator, Anti-Cheat Tab Lock, SQLite persistence, and Web Speech synthesis.">
+  <title>Microsoft Security Operations Platform Master Assessment Engine (SC-200 & Pearson VUE Exam Simulation)</title>
+  <meta name="description" content="Enterprise SC-200 & Pearson VUE Certification Exam Simulator with 500 scenario practice questions, WebRTC AI Camera Invigilator, Anti-Cheat Tab Lock, SQLite persistence, and Web Speech synthesis.">
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,7 +55,7 @@
       <span class="proctor-strikes" id="lbl-strikes">STRIKES: 0/3</span>
     </div>
     <div class="proctor-warning-banner" id="proctor-warning">
-      ⚠️ WARNING: Head turned away!
+      ⚠️ WARNING: Head turned away or hand near frame!
     </div>
   </div>
 
@@ -96,16 +96,23 @@
     <section id="view-hub" class="view-panel">
       <div class="hub-header">
         <h2>Microsoft Security Certification Hub</h2>
-        <p class="triage-subtitle">Select an exam track to start practice assessments. SC-200 includes 500 scenario practice questions with live WebRTC AI proctoring, anti-cheat tab protection, and SQLite performance analytics.</p>
+        <p class="triage-subtitle">Select a mode below. SC-200 includes 500 scenario practice questions, authentic Pearson VUE Exam Simulation, AI Proctoring, and SQLite diagnostic report persistence.</p>
       </div>
 
-      <!-- Certification Tracks Cards Grid -->
+      <!-- Certification Tracks Grid -->
       <div class="cert-tracks-grid">
+        <div class="cert-card active-track" style="border-color: var(--accent-green);">
+          <span class="cert-badge" style="background: rgba(16, 185, 129, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green);">🎯 PEARSON VUE REAL EXAM SIMULATOR</span>
+          <div class="cert-title">Pearson VUE SC-200 Real Test Center Mode</div>
+          <div class="cert-desc">Authentic Pearson VUE exam environment with 50 randomized questions, AI camera invigilator monitoring, anti-cheat tab lock, and post-exam audio report.</div>
+          <button class="btn-primary" style="width: 100%; background: var(--accent-green); color: #000;" onclick="startPearsonVueExam()">Launch Pearson VUE Real Exam Simulation &rarr;</button>
+        </div>
+
         <div class="cert-card active-track">
-          <span class="cert-badge sc200">ACTIVE TRACK • 500 QUESTIONS</span>
-          <div class="cert-title">SC-200: Microsoft Security Operations Analyst</div>
-          <div class="cert-desc">Master Defender XDR, Security Copilot, Purview, Defender for Endpoint, and Defender for Cloud with real-world exam scenarios.</div>
-          <button class="btn-primary" style="width: 100%;" onclick="openSC200Triage()">Launch SC-200 Assessment &rarr;</button>
+          <span class="cert-badge sc200">ACTIVE REVISION • 500 QUESTIONS</span>
+          <div class="cert-title">SC-200: Domain Module Revision</div>
+          <div class="cert-desc">Target individual domains (XDR, Copilot, Purview, MDE, MDC) with instant answer verification and deep-dive KQL explanations.</div>
+          <button class="btn-primary" style="width: 100%;" onclick="openSC200Triage()">Open Domain Revision Triage &rarr;</button>
         </div>
 
         <div class="cert-card" style="opacity: 0.8;">
@@ -114,18 +121,11 @@
           <div class="cert-desc">Identity, perimeter defense, data protection, security governance, and cloud security engineering practice questions.</div>
           <button class="btn-secondary" style="width: 100%; cursor: not-allowed;" disabled>AZ-500 Preview Ready</button>
         </div>
-
-        <div class="cert-card" style="opacity: 0.8;">
-          <span class="cert-badge sc100">CYBERSECURITY ARCHITECT</span>
-          <div class="cert-title">SC-100: Microsoft Cybersecurity Architect</div>
-          <div class="cert-desc">Zero Trust strategy, SecOps architecture, infrastructure compliance, and enterprise cloud security design.</div>
-          <button class="btn-secondary" style="width: 100%; cursor: not-allowed;" disabled>SC-100 Preview Ready</button>
-        </div>
       </div>
 
-      <!-- SQLite Weekly Performance Analytics -->
+      <!-- SQLite Analytics -->
       <div class="summary-card" style="max-width: 100%; text-align: left; margin-top: 24px;">
-        <h3 style="color: #fff; margin-bottom: 12px;">📊 SQLite Weekly Practice Analytics</h3>
+        <h3 style="color: #fff; margin-bottom: 12px;">📊 SQLite Pearson VUE Diagnostic Report History</h3>
         <div id="analytics-history-list" style="color: var(--text-muted); font-size: 13px;">
           Loading previous assessment sessions from SQLite...
         </div>
@@ -213,14 +213,13 @@
 
     <!-- VIEW 3: QUIZ & ASSESSMENT INTERFACE -->
     <section id="view-quiz" class="view-panel">
-      <!-- Quiz Header & Audio Bar -->
+      <!-- Quiz Header Bar -->
       <div class="quiz-header-bar">
         <div class="quiz-meta">
           <span class="question-tracker" id="lbl-question-num">Question 1 of 100</span>
           <span class="timer-badge" id="box-timer" style="display: none;">⏱️ <span id="lbl-timer">100:00</span></span>
         </div>
 
-        <!-- Audio Explanation Bar -->
         <div class="audio-control-box">
           <button class="btn-audio" id="btn-audio-play" onclick="toggleAudioExplanation()">
             <span id="audio-icon">🔊</span> <span id="audio-text">Audio Explanation</span>
@@ -241,38 +240,28 @@
         </div>
       </div>
 
-      <!-- Answer Feedback Visual Banner (Wrong vs Correct) -->
+      <!-- Feedback Banner -->
       <div id="banner-answer-feedback" class="answer-feedback-banner" style="display: none;"></div>
 
       <!-- Question Card -->
-      <div class="question-card" id="card-question-box">
+      <div class="question-card">
         <div class="scenario-box" id="lbl-scenario">Loading scenario...</div>
         <div class="question-text" id="lbl-question-text">Loading question prompt...</div>
-
-        <!-- Choices List -->
         <div class="options-list" id="container-options"></div>
 
-        <!-- Quiz Action Buttons -->
         <div class="quiz-actions-bar">
           <div class="nav-buttons-group">
-            <button class="btn-secondary" onclick="goToPreviousQuestion()" id="btn-prev" disabled>
-              &larr; Previous
-            </button>
+            <button class="btn-secondary" onclick="goToPreviousQuestion()" id="btn-prev" disabled>&larr; Previous</button>
             <button class="btn-secondary" onclick="flagQuestion()" id="btn-flag">🚩 Flag</button>
             <button class="btn-secondary" onclick="restartAssessment()">🔄 Reset</button>
           </div>
           
           <div style="display: flex; gap: 10px;">
-            <button class="btn-secondary" onclick="toggleInDepthExplanation()" id="btn-in-depth" style="display: none;">
-              💡 In-Depth Explanation
-            </button>
-            <button class="btn-primary" onclick="submitOrNextAnswer()" id="btn-submit">
-              Verify Answer
-            </button>
+            <button class="btn-secondary" onclick="toggleInDepthExplanation()" id="btn-in-depth" style="display: none;">💡 In-Depth Explanation</button>
+            <button class="btn-primary" onclick="submitOrNextAnswer()" id="btn-submit">Verify Answer</button>
           </div>
         </div>
 
-        <!-- Instant In-Depth Explanation Drawer -->
         <div class="explanation-panel" id="drawer-explanation" style="display: none;">
           <div class="exp-tabs">
             <div class="exp-tab active" onclick="switchExpTab('concept')">Concept & Rationale</div>
@@ -289,41 +278,83 @@
       </div>
     </section>
 
-    <!-- VIEW 4: EXAM & PRACTICE SCORE SUMMARY -->
-    <section id="view-summary" class="view-panel">
-      <div class="summary-card">
-        <h2>Assessment Performance Summary</h2>
-        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">SC-200 Master Assessment Results (Saved to SQLite)</p>
+    <!-- VIEW 4: PEARSON VUE REAL EXAM SIMULATION PAGE -->
+    <section id="view-pearson-exam" class="view-panel">
+      <div class="pearson-header-bar">
+        <div class="pearson-candidate-info">
+          <strong>PEARSON VUE CERTIFICATION TEST CENTER</strong><br>
+          <span style="color: var(--text-muted); font-size: 11px;">Candidate: <span id="pearson-cand-id">analyst@soc.microsoft.com</span> | Exam: SC-200 Microsoft Security Operations Analyst</span>
+        </div>
+        <div class="pearson-timer-box">⏱️ <span id="lbl-pearson-timer">100:00</span></div>
+      </div>
+
+      <!-- Pearson Question Palette Grid -->
+      <div class="pearson-palette-grid" id="pearson-palette-container"></div>
+
+      <!-- Pearson Question Card -->
+      <div class="question-card" style="border-color: var(--pearson-accent);">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-family: var(--font-mono); font-size: 12px; color: var(--accent-cyan);">
+          <span id="lbl-pearson-qnum">Item 1 of 50</span>
+          <span id="lbl-pearson-modtag">Module: DEFENDER XDR</span>
+        </div>
+        <div class="scenario-box" id="lbl-pearson-scenario">Loading scenario...</div>
+        <div class="question-text" id="lbl-pearson-qtext">Loading prompt...</div>
+
+        <div class="options-list" id="container-pearson-options"></div>
+
+        <div class="quiz-actions-bar">
+          <div class="nav-buttons-group">
+            <button class="btn-secondary" onclick="prevPearsonQuestion()" id="btn-pearson-prev" disabled>&larr; Previous Item</button>
+            <button class="btn-secondary" onclick="flagPearsonQuestion()" id="btn-pearson-flag">🚩 Flag Item</button>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn-secondary" onclick="finishPearsonExamPrompt()" style="border-color: var(--accent-yellow); color: var(--accent-yellow);">End Exam & Submit &rarr;</button>
+            <button class="btn-primary" onclick="nextPearsonQuestion()" id="btn-pearson-next">Next Item &rarr;</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 5: PEARSON VUE POST-EXAM DIAGNOSTIC SCORE REPORT & READ ALOUD AUDIO -->
+    <section id="view-pearson-report" class="view-panel">
+      <div class="summary-card" style="max-width: 900px;">
+        <h2 style="color: var(--accent-cyan);">Pearson VUE Diagnostic Score Report</h2>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">SC-200 Microsoft Certified Security Operations Analyst Associate</p>
 
         <div class="score-circle">
-          <div class="score-number" id="lbl-score-num">850</div>
+          <div class="score-number" id="lbl-pv-score-num">850</div>
           <div class="score-total">/ 1000 score</div>
         </div>
 
-        <div class="pass-badge passed" id="badge-pass-status">PASSED (Threshold: 700)</div>
+        <div class="pass-badge passed" id="badge-pv-pass-status">PASSED (Threshold: 700)</div>
 
-        <div style="text-align: left; margin: 24px 0;">
-          <h4 style="color: #fff; margin-bottom: 12px;">Domain Performance Breakdown:</h4>
-          <div id="domain-breakdown-list"></div>
+        <div style="text-align: left; margin: 20px 0;">
+          <h4 style="color: #fff; margin-bottom: 10px;">Domain Mastery Breakdown:</h4>
+          <div id="pv-domain-breakdown-list"></div>
         </div>
 
-        <div style="display: flex; justify-content: center; gap: 14px; margin-top: 24px; flex-wrap: wrap;">
+        <!-- Question-by-Question Review with Read Aloud Audio -->
+        <div style="text-align: left; margin-top: 30px;">
+          <h3 style="color: #fff; margin-bottom: 16px;">🔍 Full Diagnostic Review & Read Aloud Audio:</h3>
+          <div id="pv-questions-review-list"></div>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 14px; margin-top: 30px; flex-wrap: wrap;">
           <button class="btn-secondary" onclick="showView('view-hub')">Back to Master Hub</button>
-          <button class="btn-secondary" onclick="restartAssessment()">🔄 Re-Take Assessment</button>
-          <button class="btn-primary" onclick="exportMasterGuide()">Download Complete Revision Notes</button>
+          <button class="btn-primary" onclick="startPearsonVueExam()">Re-Take Pearson VUE Real Exam Simulation &rarr;</button>
         </div>
       </div>
     </section>
 
   </main>
 
-  <!-- Load Questions Bank & Main Application Script -->
+  <!-- Load Questions Bank & Application Script -->
   <script src="sc200_questions.js"></script>
   <script>
     // State Variables
     let currentUser = null;
     let selectedModules = ['xdr'];
-    let currentMode = 'practice'; // 'practice' or 'exam'
+    let currentMode = 'practice';
     let activeQuestions = [];
     let currentIndex = 0;
     let userAnswers = {};
@@ -338,49 +369,53 @@
     let timerInterval = null;
     let timeRemaining = 3600;
 
+    // Pearson VUE Specific State
+    let pearsonQuestions = [];
+    let pearsonIndex = 0;
+    let pearsonUserAnswers = {};
+    let pearsonFlagged = {};
+    let pearsonStartTime = 0;
+
     document.addEventListener('DOMContentLoaded', () => {
       checkAuth();
       updateModuleCardUI();
       initAntiCheatProtection();
     });
 
-    // ANTI-CHEAT TAB LOCK & QUESTION BANK COPY PROTECTION
+    // ANTI-CHEAT TAB LOCK
     function initAntiCheatProtection() {
       document.addEventListener('visibilitychange', () => {
-        if (document.hidden && currentMode === 'exam') {
+        if (document.hidden && (currentMode === 'exam' || currentMode === 'pearson')) {
           triggerProctorWarning('Tab Switch / Window Focus Lost!');
         }
       });
 
       window.addEventListener('blur', () => {
-        if (currentMode === 'exam') {
+        if (currentMode === 'exam' || currentMode === 'pearson') {
           triggerProctorWarning('Browser Window Focus Lost!');
         }
       });
 
       document.addEventListener('contextmenu', e => {
-        if (currentMode === 'exam') e.preventDefault();
+        if (currentMode === 'exam' || currentMode === 'pearson') e.preventDefault();
       });
 
       document.addEventListener('copy', e => {
-        if (currentMode === 'exam') {
+        if (currentMode === 'exam' || currentMode === 'pearson') {
           e.preventDefault();
           alert('Copying exam questions is disabled to protect question bank security.');
         }
       });
 
       document.addEventListener('selectstart', e => {
-        if (currentMode === 'exam') e.preventDefault();
+        if (currentMode === 'exam' || currentMode === 'pearson') e.preventDefault();
       });
     }
 
     function showView(viewId) {
       document.querySelectorAll('.view-panel').forEach(v => v.classList.remove('active'));
       document.getElementById(viewId).classList.add('active');
-
-      if (viewId === 'view-hub') {
-        loadUserAnalytics();
-      }
+      if (viewId === 'view-hub') loadUserAnalytics();
     }
 
     // AUTHENTICATION LOGIC
@@ -445,35 +480,35 @@
     async function loadUserAnalytics() {
       if (!currentUser) return;
       try {
-        const res = await fetch(`/api/user/analytics?email=${encodeURIComponent(currentUser.email)}`);
+        const res = await fetch(`/api/pearson/history?email=${encodeURIComponent(currentUser.email)}`);
         const data = await res.json();
         if (data.success && data.history.length > 0) {
           let html = '<table style="width:100%; border-collapse:collapse; font-size:12px; font-family:var(--font-mono);">';
-          html += '<tr style="border-bottom:1px solid var(--border-color); text-align:left; color:var(--text-muted);"><th>Timestamp</th><th>Score</th><th>Status</th><th>Questions</th><th>Proctor Strikes</th></tr>';
+          html += '<tr style="border-bottom:1px solid var(--border-color); text-align:left; color:var(--text-muted);"><th>Timestamp</th><th>Score</th><th>Result</th><th>Questions</th><th>Time Spent</th><th>Strikes</th></tr>';
           data.history.forEach(h => {
+            const mins = Math.floor(h.timeSpent / 60);
             html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
               <td style="padding:6px 0;">${h.timestamp}</td>
               <td style="color:var(--accent-cyan); font-weight:700;">${h.score}/1000</td>
               <td style="color:${h.passed ? 'var(--accent-green)' : 'var(--accent-red)'}">${h.passed ? 'PASSED' : 'FAILED'}</td>
               <td>${h.correct}/${h.total}</td>
+              <td>${mins} mins</td>
               <td>${h.strikes}</td>
             </tr>`;
           });
           html += '</table>';
           document.getElementById('analytics-history-list').innerHTML = html;
         } else {
-          document.getElementById('analytics-history-list').innerText = 'No previous assessment sessions recorded in SQLite yet. Complete an assessment to track history!';
+          document.getElementById('analytics-history-list').innerText = 'No previous Pearson VUE Exam Simulation sessions recorded in SQLite yet.';
         }
       } catch (err) {
-        document.getElementById('analytics-history-list').innerText = 'SQLite analytics offline or direct file mode.';
+        document.getElementById('analytics-history-list').innerText = 'SQLite analytics offline.';
       }
     }
 
-    function openSC200Triage() {
-      showView('view-triage');
-    }
+    function openSC200Triage() { showView('view-triage'); }
 
-    // MODULE SELECTION WITH DOMAIN ISOLATION VALIDATION
+    // MODULE TRIAGE SELECTION
     function toggleModule(modId) {
       const idx = selectedModules.indexOf(modId);
       if (idx > -1) {
@@ -504,7 +539,7 @@
       document.getElementById('mode-exam').classList.toggle('active', mode === 'exam');
     }
 
-    // WEBCAM AI INVIGILATOR ENGINE WITH GRACEFUL CAMERA FALLBACK
+    // WEBCAM AI INVIGILATOR ENGINE
     async function initProctoring() {
       proctorStrikes = 0;
       document.getElementById('lbl-strikes').innerText = `STRIKES: 0/3`;
@@ -578,323 +613,149 @@
       document.getElementById('proctor-hud').classList.remove('active');
     }
 
-    // START ASSESSMENT WITH DYNAMIC RANDOM SHUFFLING & STRICT DOMAIN ISOLATION
-    function startAssessment() {
-      const limitVal = document.getElementById('select-limit').value;
+    // PEARSON VUE REAL EXAM SIMULATION LAUNCHER (DYNAMIC RANDOM SHUFFLE)
+    function startPearsonVueExam() {
+      currentMode = 'pearson';
+      
+      // Draw 50 questions (10 per module) randomly shuffled from 500 pool
+      const modules = ['xdr', 'copilot', 'purview', 'mde', 'mdc'];
       let pool = [];
-
-      selectedModules.forEach(mod => {
-        const modQs = SC200_QUESTIONS.filter(q => q.module === mod);
-        if (limitVal === 'all') {
-          pool = pool.concat(modQs);
-        } else {
-          const limit = parseInt(limitVal, 10);
-          pool = pool.concat(modQs.slice(0, limit));
-        }
+      modules.forEach(m => {
+        const modQs = SC200_QUESTIONS.filter(q => q.module === m);
+        pool = pool.concat(modQs.sort(() => Math.random() - 0.5).slice(0, 10));
       });
 
-      if (pool.length === 0) pool = SC200_QUESTIONS.filter(q => q.module === 'xdr').slice(0, 10);
+      // DYNAMIC SHUFFLE ON EVERY RUN
+      pearsonQuestions = pool.sort(() => Math.random() - 0.5);
+      pearsonIndex = 0;
+      pearsonUserAnswers = {};
+      pearsonFlagged = {};
+      pearsonStartTime = Date.now();
 
-      activeQuestions = pool.sort(() => Math.random() - 0.5);
-      activeQuestions = activeQuestions.filter(q => selectedModules.includes(q.module));
-
-      currentIndex = 0;
-      userAnswers = {};
-      verifiedQuestions = {};
-      flaggedQuestions = {};
-
-      showView('view-quiz');
+      document.getElementById('pearson-cand-id').innerText = currentUser ? currentUser.email : 'analyst@soc.microsoft.com';
       document.getElementById('btn-global-quit').style.display = 'inline-flex';
-      document.getElementById('btn-hdr-reset').style.display = 'inline-flex';
 
-      document.getElementById('session-dot').classList.add('active');
-      document.getElementById('session-text').innerText = `Active Session: ${currentMode.toUpperCase()} (${activeQuestions.length} Qs - [${selectedModules.map(m=>m.toUpperCase()).join(', ')} ONLY])`;
+      showView('view-pearson-exam');
+      initProctoring();
+      startTimer(100 * 60);
 
-      if (currentMode === 'exam') {
-        document.getElementById('box-timer').style.display = 'inline-flex';
-        startTimer(activeQuestions.length * 90);
-        initProctoring();
-      } else {
-        document.getElementById('box-timer').style.display = 'none';
-        stopProctoring();
-      }
-
-      renderCurrentQuestion();
+      renderPearsonPalette();
+      renderPearsonCurrentQuestion();
     }
 
-    function renderCurrentQuestion() {
-      stopAudioExplanation();
-      const q = activeQuestions[currentIndex];
-      
-      document.getElementById('lbl-question-num').innerText = `Question ${currentIndex + 1} of ${activeQuestions.length} [Module: ${q.module.toUpperCase()}]`;
-      document.getElementById('lbl-scenario').innerText = q.scenario;
-      document.getElementById('lbl-question-text').innerText = q.question;
-
-      document.getElementById('btn-prev').disabled = (currentIndex === 0);
-
-      const container = document.getElementById('container-options');
+    function renderPearsonPalette() {
+      const container = document.getElementById('pearson-palette-container');
       container.innerHTML = '';
+      pearsonQuestions.forEach((q, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'palette-btn';
+        if (idx === pearsonIndex) btn.classList.add('active');
+        if (pearsonUserAnswers[q.id] !== undefined) btn.classList.add('answered');
+        if (pearsonFlagged[q.id]) btn.classList.add('flagged');
+        btn.innerText = idx + 1;
+        btn.onclick = () => {
+          pearsonIndex = idx;
+          renderPearsonPalette();
+          renderPearsonCurrentQuestion();
+        };
+        container.appendChild(btn);
+      });
+    }
 
-      const isVerified = verifiedQuestions[q.id] === true;
-      const feedbackBanner = document.getElementById('banner-answer-feedback');
+    function renderPearsonCurrentQuestion() {
+      stopAudioExplanation();
+      const q = pearsonQuestions[pearsonIndex];
 
-      if (isVerified) {
-        const userChoice = userAnswers[q.id];
-        const isCorrect = (userChoice === q.correctIndex);
+      document.getElementById('lbl-pearson-qnum').innerText = `Item ${pearsonIndex + 1} of ${pearsonQuestions.length}`;
+      document.getElementById('lbl-pearson-modtag').innerText = `Module: ${q.module.toUpperCase()}`;
+      document.getElementById('lbl-pearson-scenario').innerText = q.scenario;
+      document.getElementById('lbl-pearson-qtext').innerText = q.question;
 
-        feedbackBanner.style.display = 'flex';
-        if (isCorrect) {
-          feedbackBanner.className = 'answer-feedback-banner correct';
-          feedbackBanner.innerHTML = '<span>✅ CORRECT ANSWER! Excellent SOC Decision.</span><span>Score: +100</span>';
-        } else {
-          feedbackBanner.className = 'answer-feedback-banner incorrect';
-          feedbackBanner.innerHTML = `<span>❌ WRONG ANSWER! Correct Choice is Option ${String.fromCharCode(65 + q.correctIndex)}.</span><span>See Explanation Below</span>`;
-        }
-      } else {
-        feedbackBanner.style.display = 'none';
-      }
+      document.getElementById('btn-pearson-prev').disabled = (pearsonIndex === 0);
+      document.getElementById('btn-pearson-flag').innerText = pearsonFlagged[q.id] ? '🚩 Flagged Item' : '🚩 Flag Item';
+
+      const container = document.getElementById('container-pearson-options');
+      container.innerHTML = '';
 
       q.options.forEach((opt, idx) => {
         const letter = String.fromCharCode(65 + idx);
         const item = document.createElement('div');
         item.className = 'option-item';
-        
-        if (userAnswers[q.id] === idx) item.classList.add('selected');
+        if (pearsonUserAnswers[q.id] === idx) item.classList.add('selected');
 
-        if (isVerified) {
-          if (idx === q.correctIndex) {
-            item.classList.add('correct');
-          } else if (userAnswers[q.id] === idx) {
-            item.classList.add('incorrect');
-          }
-        }
-        
-        item.onclick = () => selectOption(idx);
+        item.onclick = () => selectPearsonOption(idx);
         item.innerHTML = `
           <div class="option-letter">${letter}</div>
           <div class="option-label-text">${opt}</div>
         `;
         container.appendChild(item);
       });
+    }
 
-      const drawer = document.getElementById('drawer-explanation');
-      const btnInDepth = document.getElementById('btn-in-depth');
-      const btnSubmit = document.getElementById('btn-submit');
+    function selectPearsonOption(idx) {
+      const q = pearsonQuestions[pearsonIndex];
+      pearsonUserAnswers[q.id] = idx;
+      renderPearsonPalette();
+      renderPearsonCurrentQuestion();
+    }
 
-      if (isVerified) {
-        populateExplanationTabs(q);
-        drawer.style.display = 'block';
-        btnInDepth.style.display = 'inline-flex';
-        btnSubmit.innerText = (currentIndex === activeQuestions.length - 1) ? 'Finish Assessment' : 'Next Question &rarr;';
+    function flagPearsonQuestion() {
+      const q = pearsonQuestions[pearsonIndex];
+      pearsonFlagged[q.id] = !pearsonFlagged[q.id];
+      renderPearsonPalette();
+      renderPearsonCurrentQuestion();
+    }
+
+    function prevPearsonQuestion() {
+      if (pearsonIndex > 0) {
+        pearsonIndex--;
+        renderPearsonPalette();
+        renderPearsonCurrentQuestion();
+      }
+    }
+
+    function nextPearsonQuestion() {
+      if (pearsonIndex < pearsonQuestions.length - 1) {
+        pearsonIndex++;
+        renderPearsonPalette();
+        renderPearsonCurrentQuestion();
       } else {
-        drawer.style.display = 'none';
-        btnInDepth.style.display = 'none';
-        btnSubmit.innerText = (currentMode === 'practice') ? 'Verify Answer' : ((currentIndex === activeQuestions.length - 1) ? 'Finish Assessment' : 'Next Question &rarr;');
-      }
-
-      document.getElementById('btn-flag').innerText = flaggedQuestions[q.id] ? '🚩 Flagged' : '🚩 Flag';
-    }
-
-    function selectOption(idx) {
-      const q = activeQuestions[currentIndex];
-      if (currentMode === 'practice' && verifiedQuestions[q.id]) return;
-      userAnswers[q.id] = idx;
-      document.querySelectorAll('.option-item').forEach((item, i) => item.classList.toggle('selected', i === idx));
-    }
-
-    function flagQuestion() {
-      const q = activeQuestions[currentIndex];
-      flaggedQuestions[q.id] = !flaggedQuestions[q.id];
-      document.getElementById('btn-flag').innerText = flaggedQuestions[q.id] ? '🚩 Flagged' : '🚩 Flag';
-    }
-
-    function goToPreviousQuestion() {
-      if (currentIndex > 0) {
-        currentIndex--;
-        renderCurrentQuestion();
+        finishPearsonExamPrompt();
       }
     }
 
-    function submitOrNextAnswer() {
-      const q = activeQuestions[currentIndex];
-
-      if (userAnswers[q.id] === undefined) {
-        alert('Please select an option before proceeding.');
-        return;
-      }
-
-      if (currentMode === 'practice' && !verifiedQuestions[q.id]) {
-        verifiedQuestions[q.id] = true;
-        verifyAnswerUI();
-        triggerAudioExplanation(q.audioSummary);
-        return;
-      }
-
-      if (currentIndex < activeQuestions.length - 1) {
-        currentIndex++;
-        renderCurrentQuestion();
-      } else {
-        finishAssessment();
+    function finishPearsonExamPrompt() {
+      const answeredCount = Object.keys(pearsonUserAnswers).length;
+      if (confirm(`You have answered ${answeredCount} of ${pearsonQuestions.length} items. Are you sure you want to end your Pearson VUE exam and view your score report?`)) {
+        finishPearsonExam();
       }
     }
 
-    function verifyAnswerUI() {
-      const q = activeQuestions[currentIndex];
-      const userChoice = userAnswers[q.id];
-      const isCorrect = (userChoice === q.correctIndex);
-
-      const feedbackBanner = document.getElementById('banner-answer-feedback');
-      feedbackBanner.style.display = 'flex';
-      if (isCorrect) {
-        feedbackBanner.className = 'answer-feedback-banner correct';
-        feedbackBanner.innerHTML = '<span>✅ CORRECT ANSWER! Excellent SOC Decision.</span><span>Score: +100</span>';
-      } else {
-        feedbackBanner.className = 'answer-feedback-banner incorrect';
-        feedbackBanner.innerHTML = `<span>❌ WRONG ANSWER! Correct Choice is Option ${String.fromCharCode(65 + q.correctIndex)}.</span><span>See Explanation Below</span>`;
-      }
-
-      document.querySelectorAll('.option-item').forEach((item, i) => {
-        if (i === q.correctIndex) item.classList.add('correct');
-        else if (userChoice === i) item.classList.add('incorrect');
-      });
-
-      document.getElementById('btn-in-depth').style.display = 'inline-flex';
-      document.getElementById('btn-submit').innerText = (currentIndex === activeQuestions.length - 1) ? 'Finish Assessment' : 'Next Question &rarr;';
-      populateExplanationTabs(q);
-      document.getElementById('drawer-explanation').style.display = 'block';
-    }
-
-    function populateExplanationTabs(q) {
-      const exp = q.explanation;
-      document.getElementById('tab-exp-concept').innerHTML = `
-        <h4 style="color: var(--accent-cyan); margin-bottom: 8px;">${exp.concept}</h4>
-        <p>${q.audioSummary}</p>
-        <div class="soc-tip-box"><strong>Doc Ref:</strong> ${exp.docRef}</div>
-      `;
-
-      let optHTML = '<ul style="list-style:none; padding:0;">';
-      exp.analysis.forEach(line => {
-        const isC = line.startsWith('CORRECT');
-        optHTML += `<li style="margin-bottom:8px; color:${isC ? 'var(--accent-green)' : 'var(--text-muted)'}">${line}</li>`;
-      });
-      optHTML += '</ul>';
-      document.getElementById('tab-exp-analysis').innerHTML = optHTML;
-
-      document.getElementById('tab-exp-code').innerHTML = `<div class="code-block">${exp.codeSnippet}</div>`;
-      document.getElementById('tab-exp-soc').innerHTML = `<div class="soc-tip-box"><strong>⚡ SOC Triage Tip:</strong><br>${exp.socTip}</div>`;
-    }
-
-    function toggleInDepthExplanation() {
-      const drawer = document.getElementById('drawer-explanation');
-      drawer.style.display = (drawer.style.display === 'none') ? 'block' : 'none';
-    }
-
-    function switchExpTab(tabName) {
-      document.querySelectorAll('.exp-tab').forEach(t => t.classList.toggle('active', t.getAttribute('onclick').includes(tabName)));
-      document.querySelectorAll('.exp-content').forEach(c => c.classList.toggle('active', c.id === `tab-exp-${tabName}`));
-    }
-
-    // AUDIO SPEECH SYNTHESIS
-    function toggleAudioExplanation() {
-      if (isSpeechPlaying) stopAudioExplanation();
-      else triggerAudioExplanation(activeQuestions[currentIndex].audioSummary);
-    }
-
-    function triggerAudioExplanation(text) {
-      if (!('speechSynthesis' in window)) return;
-      stopAudioExplanation();
-
-      speechUtterance = new SpeechSynthesisUtterance(text);
-      speechUtterance.rate = speechRate;
-      speechUtterance.onstart = () => {
-        isSpeechPlaying = true;
-        document.getElementById('audio-icon').innerText = '⏸️';
-        document.getElementById('audio-text').innerText = 'Pause Audio';
-        document.getElementById('audio-wave').classList.add('playing');
-      };
-      speechUtterance.onend = () => stopAudioUIState();
-      speechUtterance.onerror = () => stopAudioUIState();
-      window.speechSynthesis.speak(speechUtterance);
-    }
-
-    function stopAudioExplanation() {
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-      stopAudioUIState();
-    }
-
-    function stopAudioUIState() {
-      isSpeechPlaying = false;
-      document.getElementById('audio-icon').innerText = '🔊';
-      document.getElementById('audio-text').innerText = 'Audio Explanation';
-      document.getElementById('audio-wave').classList.remove('playing');
-    }
-
-    function changeSpeechRate(val) {
-      speechRate = parseFloat(val);
-      if (isSpeechPlaying) triggerAudioExplanation(activeQuestions[currentIndex].audioSummary);
-    }
-
-    // TIMER
-    function startTimer(seconds) {
-      clearInterval(timerInterval);
-      timeRemaining = seconds;
-      timerInterval = setInterval(() => {
-        timeRemaining--;
-        const mins = Math.floor(timeRemaining / 60);
-        const secs = timeRemaining % 60;
-        document.getElementById('lbl-timer').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-        if (timeRemaining <= 0) {
-          clearInterval(timerInterval);
-          alert('Time limit reached! Submitting assessment.');
-          finishAssessment();
-        }
-      }, 1000);
-    }
-
-    function restartAssessment() {
-      if (confirm('Are you sure you want to reset this assessment session?')) {
-        stopAudioExplanation();
-        userAnswers = {};
-        verifiedQuestions = {};
-        flaggedQuestions = {};
-        currentIndex = 0;
-        renderCurrentQuestion();
-      }
-    }
-
-    function quitAssessment() {
-      if (confirm('Quit this session and return to revision?')) {
-        stopAudioExplanation();
-        stopProctoring();
-        clearInterval(timerInterval);
-        showView('view-triage');
-      }
-    }
-
-    // FINISH ASSESSMENT & SQLITE PERSISTENCE
-    function finishAssessment() {
+    // PEARSON VUE DIAGNOSTIC REPORT & READ ALOUD ENGINE
+    function finishPearsonExam() {
       stopAudioExplanation();
       stopProctoring();
       clearInterval(timerInterval);
 
+      const timeSpentSec = Math.round((Date.now() - pearsonStartTime) / 1000);
       let correctCount = 0;
       const domainStats = { xdr: { c: 0, t: 0 }, copilot: { c: 0, t: 0 }, purview: { c: 0, t: 0 }, mde: { c: 0, t: 0 }, mdc: { c: 0, t: 0 } };
 
-      activeQuestions.forEach(q => {
+      pearsonQuestions.forEach(q => {
         domainStats[q.module].t++;
-        if (userAnswers[q.id] === q.correctIndex) {
+        if (pearsonUserAnswers[q.id] === q.correctIndex) {
           correctCount++;
           domainStats[q.module].c++;
         }
       });
 
-      const finalScore = Math.round((correctCount / activeQuestions.length) * 1000);
+      const finalScore = Math.round((correctCount / pearsonQuestions.length) * 1000);
       const isPassed = finalScore >= 700;
 
-      document.getElementById('lbl-score-num').innerText = finalScore;
-      const badge = document.getElementById('badge-pass-status');
+      document.getElementById('lbl-pv-score-num').innerText = finalScore;
+      const badge = document.getElementById('badge-pv-pass-status');
       badge.className = `pass-badge ${isPassed ? 'passed' : 'failed'}`;
-      badge.innerText = isPassed ? 'PASSED (Threshold: 700)' : 'FAILED (Threshold: 700)';
+      badge.innerText = isPassed ? 'PASSED (Pearson VUE Threshold: 700)' : 'FAILED (Pearson VUE Threshold: 700)';
 
       let breakdownHTML = '';
       Object.keys(domainStats).forEach(mod => {
@@ -913,57 +774,297 @@
           `;
         }
       });
-      document.getElementById('domain-breakdown-list').innerHTML = breakdownHTML;
+      document.getElementById('pv-domain-breakdown-list').innerHTML = breakdownHTML;
 
+      // Render Question-by-Question Review with Read Aloud Audio
+      let reviewHTML = '';
+      pearsonQuestions.forEach((q, i) => {
+        const uAns = pearsonUserAnswers[q.id];
+        const isCorrect = (uAns === q.correctIndex);
+        const exp = q.explanation;
+
+        let optListHTML = '<ul style="list-style:none; padding:0; margin-top:8px;">';
+        exp.analysis.forEach(line => {
+          const isC = line.startsWith('CORRECT');
+          optListHTML += `<li style="margin-bottom:6px; font-size:13px; color:${isC ? 'var(--accent-green)' : 'var(--text-muted)'}">${line}</li>`;
+        });
+        optListHTML += '</ul>';
+
+        reviewHTML += `
+          <div class="report-q-card">
+            <div class="report-q-header">
+              <span class="report-q-tag ${isCorrect ? 'correct' : 'incorrect'}">Q${i + 1} [${q.module.toUpperCase()}] - ${isCorrect ? '✅ CORRECT' : '❌ INCORRECT'}</span>
+              <button class="btn-read-aloud" onclick="readAloudQuestionAudio('${q.id}')">🔊 Read Aloud</button>
+            </div>
+            <div style="font-weight:600; color:#fff; font-size:15px; margin-bottom:6px;">${q.question}</div>
+            <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;"><strong>Scenario:</strong> ${q.scenario}</div>
+            
+            <div style="font-size:13px; margin-bottom:8px;">
+              <strong>Your Choice:</strong> ${uAns !== undefined ? String.fromCharCode(65 + uAns) + '. ' + q.options[uAns] : 'Not Answered'} | 
+              <strong style="color:var(--accent-green);">Correct Choice: Option ${String.fromCharCode(65 + q.correctIndex)}</strong>
+            </div>
+
+            <div style="background:rgba(15,23,42,0.8); border:1px solid var(--border-color); border-radius:6px; padding:12px; margin-top:10px;">
+              <strong style="color:var(--accent-cyan); font-size:13px;">Why Choice is Right & What is Wrong with Others:</strong>
+              ${optListHTML}
+              <div style="margin-top:8px; font-size:12px; font-family:var(--font-mono); color:#a5f3fc;">KQL: ${exp.codeSnippet}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      document.getElementById('pv-questions-review-list').innerHTML = reviewHTML;
+
+      // Save attempt to SQLite via REST API
       if (currentUser) {
-        fetch('/api/session/submit', {
+        fetch('/api/pearson/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             userEmail: currentUser.email,
             examCode: 'SC-200',
-            mode: currentMode,
             score: finalScore,
-            totalQuestions: activeQuestions.length,
+            totalQuestions: pearsonQuestions.length,
             correctQuestions: correctCount,
             domainStats: domainStats,
-            proctorStrikes: proctorStrikes
+            userAnswers: pearsonUserAnswers,
+            proctorStrikes: proctorStrikes,
+            timeSpentSeconds: timeSpentSec
           })
         }).catch(err => console.warn('SQLite save offline:', err));
       }
 
+      showView('view-pearson-report');
+    }
+
+    function readAloudQuestionAudio(qId) {
+      const q = SC200_QUESTIONS.find(x => x.id === qId);
+      if (q) {
+        const textToRead = `Question: ${q.question}. ${q.audioSummary}`;
+        triggerAudioExplanation(textToRead);
+      }
+    }
+
+    // DOMAIN REVISION PRACTICE FUNCTIONS
+    function startAssessment() {
+      currentMode = 'practice';
+      const limitVal = document.getElementById('select-limit').value;
+      let pool = [];
+
+      selectedModules.forEach(mod => {
+        const modQs = SC200_QUESTIONS.filter(q => q.module === mod);
+        if (limitVal === 'all') pool = pool.concat(modQs);
+        else pool = pool.concat(modQs.slice(0, parseInt(limitVal, 10)));
+      });
+
+      activeQuestions = pool.sort(() => Math.random() - 0.5).filter(q => selectedModules.includes(q.module));
+      currentIndex = 0;
+      userAnswers = {};
+      verifiedQuestions = {};
+      flaggedQuestions = {};
+
+      showView('view-quiz');
+      document.getElementById('btn-global-quit').style.display = 'inline-flex';
+      document.getElementById('btn-hdr-reset').style.display = 'inline-flex';
+      document.getElementById('session-dot').classList.add('active');
+      document.getElementById('session-text').innerText = `Active Session: PRACTICE (${activeQuestions.length} Qs)`;
+
+      renderCurrentQuestion();
+    }
+
+    function renderCurrentQuestion() {
+      stopAudioExplanation();
+      const q = activeQuestions[currentIndex];
+      document.getElementById('lbl-question-num').innerText = `Question ${currentIndex + 1} of ${activeQuestions.length} [Module: ${q.module.toUpperCase()}]`;
+      document.getElementById('lbl-scenario').innerText = q.scenario;
+      document.getElementById('lbl-question-text').innerText = q.question;
+      document.getElementById('btn-prev').disabled = (currentIndex === 0);
+
+      const container = document.getElementById('container-options');
+      container.innerHTML = '';
+
+      const isVerified = verifiedQuestions[q.id] === true;
+      const feedbackBanner = document.getElementById('banner-answer-feedback');
+
+      if (isVerified) {
+        const isCorrect = (userAnswers[q.id] === q.correctIndex);
+        feedbackBanner.style.display = 'flex';
+        feedbackBanner.className = `answer-feedback-banner ${isCorrect ? 'correct' : 'incorrect'}`;
+        feedbackBanner.innerHTML = isCorrect ? '<span>✅ CORRECT ANSWER! Excellent SOC Decision.</span>' : `<span>❌ WRONG ANSWER! Correct Choice is Option ${String.fromCharCode(65 + q.correctIndex)}.</span>`;
+      } else {
+        feedbackBanner.style.display = 'none';
+      }
+
+      q.options.forEach((opt, idx) => {
+        const item = document.createElement('div');
+        item.className = 'option-item';
+        if (userAnswers[q.id] === idx) item.classList.add('selected');
+        if (isVerified) {
+          if (idx === q.correctIndex) item.classList.add('correct');
+          else if (userAnswers[q.id] === idx) item.classList.add('incorrect');
+        }
+        item.onclick = () => selectOption(idx);
+        item.innerHTML = `<div class="option-letter">${String.fromCharCode(65 + idx)}</div><div class="option-label-text">${opt}</div>`;
+        container.appendChild(item);
+      });
+
+      const drawer = document.getElementById('drawer-explanation');
+      const btnInDepth = document.getElementById('btn-in-depth');
+      const btnSubmit = document.getElementById('btn-submit');
+
+      if (isVerified) {
+        populateExplanationTabs(q);
+        drawer.style.display = 'block';
+        btnInDepth.style.display = 'inline-flex';
+        btnSubmit.innerText = (currentIndex === activeQuestions.length - 1) ? 'Finish Assessment' : 'Next Question &rarr;';
+      } else {
+        drawer.style.display = 'none';
+        btnInDepth.style.display = 'none';
+        btnSubmit.innerText = 'Verify Answer';
+      }
+      document.getElementById('btn-flag').innerText = flaggedQuestions[q.id] ? '🚩 Flagged' : '🚩 Flag';
+    }
+
+    function selectOption(idx) {
+      const q = activeQuestions[currentIndex];
+      if (verifiedQuestions[q.id]) return;
+      userAnswers[q.id] = idx;
+      document.querySelectorAll('.option-item').forEach((item, i) => item.classList.toggle('selected', i === idx));
+    }
+
+    function flagQuestion() {
+      const q = activeQuestions[currentIndex];
+      flaggedQuestions[q.id] = !flaggedQuestions[q.id];
+      document.getElementById('btn-flag').innerText = flaggedQuestions[q.id] ? '🚩 Flagged' : '🚩 Flag';
+    }
+
+    function goToPreviousQuestion() { if (currentIndex > 0) { currentIndex--; renderCurrentQuestion(); } }
+
+    function submitOrNextAnswer() {
+      const q = activeQuestions[currentIndex];
+      if (userAnswers[q.id] === undefined) { alert('Please select an option before proceeding.'); return; }
+      if (!verifiedQuestions[q.id]) {
+        verifiedQuestions[q.id] = true;
+        verifyAnswerUI();
+        triggerAudioExplanation(q.audioSummary);
+        return;
+      }
+      if (currentIndex < activeQuestions.length - 1) { currentIndex++; renderCurrentQuestion(); }
+      else finishAssessment();
+    }
+
+    function verifyAnswerUI() {
+      const q = activeQuestions[currentIndex];
+      const isCorrect = (userAnswers[q.id] === q.correctIndex);
+      const feedbackBanner = document.getElementById('banner-answer-feedback');
+      feedbackBanner.style.display = 'flex';
+      feedbackBanner.className = `answer-feedback-banner ${isCorrect ? 'correct' : 'incorrect'}`;
+      feedbackBanner.innerHTML = isCorrect ? '<span>✅ CORRECT ANSWER! Excellent SOC Decision.</span>' : `<span>❌ WRONG ANSWER! Correct Choice is Option ${String.fromCharCode(65 + q.correctIndex)}.</span>`;
+
+      document.querySelectorAll('.option-item').forEach((item, i) => {
+        if (i === q.correctIndex) item.classList.add('correct');
+        else if (userAnswers[q.id] === i) item.classList.add('incorrect');
+      });
+
+      document.getElementById('btn-in-depth').style.display = 'inline-flex';
+      document.getElementById('btn-submit').innerText = (currentIndex === activeQuestions.length - 1) ? 'Finish Assessment' : 'Next Question &rarr;';
+      populateExplanationTabs(q);
+      document.getElementById('drawer-explanation').style.display = 'block';
+    }
+
+    function populateExplanationTabs(q) {
+      const exp = q.explanation;
+      document.getElementById('tab-exp-concept').innerHTML = `<h4 style="color:var(--accent-cyan); margin-bottom:8px;">${exp.concept}</h4><p>${q.audioSummary}</p><div class="soc-tip-box"><strong>Doc Ref:</strong> ${exp.docRef}</div>`;
+      let optHTML = '<ul style="list-style:none; padding:0;">';
+      exp.analysis.forEach(line => { optHTML += `<li style="margin-bottom:8px; color:${line.startsWith('CORRECT') ? 'var(--accent-green)' : 'var(--text-muted)'}">${line}</li>`; });
+      optHTML += '</ul>';
+      document.getElementById('tab-exp-analysis').innerHTML = optHTML;
+      document.getElementById('tab-exp-code').innerHTML = `<div class="code-block">${exp.codeSnippet}</div>`;
+      document.getElementById('tab-exp-soc').innerHTML = `<div class="soc-tip-box"><strong>⚡ SOC Triage Tip:</strong><br>${exp.socTip}</div>`;
+    }
+
+    function toggleInDepthExplanation() { const d = document.getElementById('drawer-explanation'); d.style.display = (d.style.display === 'none') ? 'block' : 'none'; }
+    function switchExpTab(tabName) {
+      document.querySelectorAll('.exp-tab').forEach(t => t.classList.toggle('active', t.getAttribute('onclick').includes(tabName)));
+      document.querySelectorAll('.exp-content').forEach(c => c.classList.toggle('active', c.id === `tab-exp-${tabName}`));
+    }
+
+    // AUDIO SPEECH SYNTHESIS
+    function toggleAudioExplanation() {
+      if (isSpeechPlaying) stopAudioExplanation();
+      else triggerAudioExplanation(activeQuestions[currentIndex].audioSummary);
+    }
+
+    function triggerAudioExplanation(text) {
+      if (!('speechSynthesis' in window)) return;
+      stopAudioExplanation();
+      speechUtterance = new SpeechSynthesisUtterance(text);
+      speechUtterance.rate = speechRate;
+      speechUtterance.onstart = () => {
+        isSpeechPlaying = true;
+        document.getElementById('audio-icon').innerText = '⏸️';
+        document.getElementById('audio-text').innerText = 'Pause Audio';
+        document.getElementById('audio-wave').classList.add('playing');
+      };
+      speechUtterance.onend = () => stopAudioUIState();
+      speechUtterance.onerror = () => stopAudioUIState();
+      window.speechSynthesis.speak(speechUtterance);
+    }
+
+    function stopAudioExplanation() { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); stopAudioUIState(); }
+    function stopAudioUIState() { isSpeechPlaying = false; document.getElementById('audio-icon').innerText = '🔊'; document.getElementById('audio-text').innerText = 'Audio Explanation'; document.getElementById('audio-wave').classList.remove('playing'); }
+    function changeSpeechRate(val) { speechRate = parseFloat(val); if (isSpeechPlaying) triggerAudioExplanation(activeQuestions[currentIndex].audioSummary); }
+
+    function startTimer(seconds) {
+      clearInterval(timerInterval);
+      timeRemaining = seconds;
+      timerInterval = setInterval(() => {
+        timeRemaining--;
+        const mins = Math.floor(timeRemaining / 60);
+        const secs = timeRemaining % 60;
+        const timeStr = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        if (document.getElementById('lbl-timer')) document.getElementById('lbl-timer').innerText = timeStr;
+        if (document.getElementById('lbl-pearson-timer')) document.getElementById('lbl-pearson-timer').innerText = timeStr;
+
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          alert('Time limit reached!');
+          if (currentMode === 'pearson') finishPearsonExam();
+          else finishAssessment();
+        }
+      }, 1000);
+    }
+
+    function restartAssessment() {
+      if (confirm('Reset session progress?')) {
+        stopAudioExplanation();
+        userAnswers = {}; verifiedQuestions = {}; flaggedQuestions = {}; currentIndex = 0; renderCurrentQuestion();
+      }
+    }
+
+    function quitAssessment() {
+      if (confirm('Quit to master hub?')) {
+        stopAudioExplanation(); stopProctoring(); clearInterval(timerInterval); showView('view-hub');
+      }
+    }
+
+    function finishAssessment() {
+      stopAudioExplanation(); stopProctoring(); clearInterval(timerInterval);
+      let correctCount = 0;
+      activeQuestions.forEach(q => { if (userAnswers[q.id] === q.correctIndex) correctCount++; });
+      const finalScore = Math.round((correctCount / activeQuestions.length) * 1000);
+      document.getElementById('lbl-score-num').innerText = finalScore;
       showView('view-summary');
     }
 
-    // EXPORT GUIDE FILE
     function exportMasterGuide() {
-      let content = `# SC-200 Microsoft Security Operations Platform Master Revision Guide\n\n`;
-      content += `Generated on: ${new Date().toLocaleString()}\n`;
-      content += `Total Questions & Technical Explanations: ${SC200_QUESTIONS.length}\n\n`;
-      content += `---\n\n`;
-
+      let content = `# SC-200 Master Revision Guide\n\nTotal Questions: ${SC200_QUESTIONS.length}\n\n---\n\n`;
       SC200_QUESTIONS.forEach((q, i) => {
-        content += `### Q${i + 1} [${q.module.toUpperCase()}] ${q.topic}\n\n`;
-        content += `**Scenario:** ${q.scenario}\n\n`;
-        content += `**Question:** ${q.question}\n\n`;
-        content += `**Options:**\n`;
-        q.options.forEach((opt, oIdx) => {
-          content += `${oIdx === q.correctIndex ? '✅' : '  '} ${String.fromCharCode(65 + oIdx)}. ${opt}\n`;
-        });
-        content += `\n**Audio Summary & Rationale:**\n${q.audioSummary}\n\n`;
-        content += `**Technical Concept:** ${q.explanation.concept}\n\n`;
-        content += `**KQL / Command Reference:**\n\`\`\`kql\n${q.explanation.codeSnippet}\n\`\`\`\n\n`;
-        content += `**SOC Triage Tip:** ${q.explanation.socTip}\n\n`;
-        content += `---\n\n`;
+        content += `### Q${i + 1} [${q.module.toUpperCase()}] ${q.topic}\n\n**Scenario:** ${q.scenario}\n\n**Question:** ${q.question}\n\n**Audio Summary:** ${q.audioSummary}\n\n---\n\n`;
       });
-
       const blob = new Blob([content], { type: 'text/markdown' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'SC200_Master_Assessment_Complete_Guide.md';
-      a.click();
-      URL.revokeObjectURL(url);
+      const a = document.createElement('a'); a.href = url; a.download = 'SC200_Master_Guide.md'; a.click(); URL.revokeObjectURL(url);
     }
   </script>
 </body>
