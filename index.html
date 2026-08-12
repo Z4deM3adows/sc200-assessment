@@ -346,7 +346,6 @@
 
     // ANTI-CHEAT TAB LOCK & QUESTION BANK COPY PROTECTION
     function initAntiCheatProtection() {
-      // 1. Detect Tab Switching / Minimizing Browser
       document.addEventListener('visibilitychange', () => {
         if (document.hidden && currentMode === 'exam') {
           triggerProctorWarning('Tab Switch / Window Focus Lost!');
@@ -359,7 +358,6 @@
         }
       });
 
-      // 2. Prevent Right-Click Context Menu, Text Copying, and Inspect Hotkeys during Exam Mode
       document.addEventListener('contextmenu', e => {
         if (currentMode === 'exam') e.preventDefault();
       });
@@ -506,7 +504,7 @@
       document.getElementById('mode-exam').classList.toggle('active', mode === 'exam');
     }
 
-    // WEBCAM AI INVIGILATOR ENGINE
+    // WEBCAM AI INVIGILATOR ENGINE WITH GRACEFUL CAMERA FALLBACK
     async function initProctoring() {
       proctorStrikes = 0;
       document.getElementById('lbl-strikes').innerText = `STRIKES: 0/3`;
@@ -517,10 +515,12 @@
         const video = document.getElementById('proctor-video');
         video.srcObject = proctorStream;
         document.getElementById('proctor-hud').classList.add('active');
+        document.getElementById('proctor-status').innerText = 'AI PROCTOR: ACTIVE';
         startProctorAnalyzer();
       } catch (err) {
-        console.warn('Webcam permission denied or unavailable:', err);
-        document.getElementById('proctor-hud').classList.remove('active');
+        console.warn('Webcam permission denied or missing hardware:', err);
+        document.getElementById('proctor-hud').classList.add('active');
+        document.getElementById('proctor-status').innerText = 'PROCTOR: SIMULATED (No Cam)';
       }
     }
 
