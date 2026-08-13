@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pearson VUE — SC-200 Secure Test Environment</title>
+<meta name="description" content="Locked-down SC-200 Pearson VUE exam simulation: server-timed, server-graded, blueprint-weighted, with AI proctoring and integrity monitoring.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pv-bg: #eef1f5;
+    --pv-surface: #ffffff;
+    --pv-ink: #1b2430;
+    --pv-muted: #5b6472;
+    --pv-border: #d8dce3;
+    --pv-accent: #0b3d91;
+    --pv-accent-soft: #e8eefc;
+    --pv-danger: #b3261e;
+    --pv-danger-soft: #fbe9e7;
+    --pv-success: #1e7145;
+    --pv-success-soft: #e7f4ec;
+    --pv-warn: #9a5b00;
+    --font-display: 'JetBrains Mono', monospace;
+    --font-body: 'Inter', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; min-height: 100vh;
+    background: var(--pv-bg); color: var(--pv-ink);
+    font-family: var(--font-body);
+    -webkit-user-select: none; user-select: none;
+  }
+  .watermark-layer {
+    position: fixed; inset: 0; pointer-events: none; z-index: 999;
+    background-repeat: repeat; mix-blend-mode: multiply;
+  }
+  button { font-family: var(--font-body); cursor: pointer; }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--pv-accent); outline-offset: 2px; }
+
+  /* ---------- Gate screen ---------- */
+  #gate-screen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  .gate-card {
+    background: var(--pv-surface); border: 1px solid var(--pv-border); border-radius: 4px;
+    max-width: 640px; width: 100%; padding: 40px; box-shadow: 0 1px 3px rgba(27,36,48,0.08);
+  }
+  .gate-seal {
+    font-family: var(--font-display); font-size: 11px; letter-spacing: 0.14em; color: var(--pv-accent);
+    text-transform: uppercase; border: 1px solid var(--pv-accent); display: inline-block;
+    padding: 4px 10px; border-radius: 2px; margin-bottom: 18px;
+  }
+  .gate-card h1 { font-size: 22px; margin: 0 0 8px; }
+  .gate-card p.sub { color: var(--pv-muted); font-size: 14px; margin: 0 0 24px; }
+  .gate-rules { list-style: none; padding: 0; margin: 0 0 28px; }
+  .gate-rules li {
+    font-size: 13.5px; color: var(--pv-ink); padding: 10px 0 10px 28px; position: relative;
+    border-bottom: 1px solid #eef0f3;
+  }
+  .gate-rules li::before { content: "—"; position: absolute; left: 0; color: var(--pv-accent); font-family: var(--font-display); }
+  .gate-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .btn-pv-primary {
+    background: var(--pv-accent); color: #fff; border: none; padding: 13px 22px; font-size: 14px;
+    font-weight: 600; border-radius: 3px; letter-spacing: 0.01em;
+  }
+  .btn-pv-primary:hover { background: #092f70; }
+  .btn-pv-ghost {
+    background: transparent; color: var(--pv-muted); border: 1px solid var(--pv-border); padding: 12px 18px;
+    font-size: 14px; border-radius: 3px;
+  }
+  #gate-error { color: var(--pv-danger); font-size: 13px; margin-top: 14px; display: none; }
+
+  /* ---------- Exam shell ---------- */
+  #exam-shell { display: none; min-height: 100vh; flex-direction: column; }
+  .pv-topbar {
+    background: var(--pv-ink); color: #fff; display: flex; align-items: center; gap: 24px;
+    padding: 10px 20px; font-family: var(--font-display); font-size: 12.5px; flex-wrap: wrap;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .pv-topbar .pv-lock { color: #9fd4a3; letter-spacing: 0.06em; }
+  .pv-topbar .pv-spacer { flex: 1; }
+  .pv-topbar .pv-candidate { color: #c7cedb; }
+  .pv-timer { background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 3px; font-weight: 600; }
+  .pv-timer.low { background: var(--pv-danger); }
+  .pv-strikes { background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 3px; }
+  .pv-strikes.hot { background: var(--pv-danger); }
+
+  .pv-body { flex: 1; display: flex; min-height: 0; }
+  .pv-palette {
+    width: 220px; background: var(--pv-surface); border-right: 1px solid var(--pv-border);
+    padding: 16px 12px; overflow-y: auto;
+  }
+  .pv-palette h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--pv-muted); margin: 4px 6px 10px; }
+  .pv-palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .pv-pnode {
+    aspect-ratio: 1; border: 1px solid var(--pv-border); background: var(--pv-surface); border-radius: 3px;
+    font-family: var(--font-display); font-size: 12px; display: flex; align-items: center; justify-content: center;
+    color: var(--pv-muted);
+  }
+  .pv-pnode.answered { background: var(--pv-accent-soft); border-color: var(--pv-accent); color: var(--pv-accent); }
+  .pv-pnode.current { border-color: var(--pv-ink); border-width: 2px; color: var(--pv-ink); font-weight: 700; }
+  .pv-pnode.flagged { box-shadow: inset 0 -3px 0 var(--pv-warn); }
+
+  .pv-question-pane { flex: 1; padding: 28px 36px 40px; max-width: 880px; overflow-y: auto; }
+  .pv-item-meta { display: flex; justify-content: space-between; font-family: var(--font-display); font-size: 12px; color: var(--pv-accent); margin-bottom: 14px; }
+  .pv-scenario {
+    background: #f7f8fa; border-left: 3px solid var(--pv-accent); padding: 14px 16px; font-size: 14px;
+    color: var(--pv-muted); margin-bottom: 16px; line-height: 1.55;
+  }
+  .pv-question { font-size: 16px; font-weight: 600; margin-bottom: 20px; line-height: 1.5; }
+  .pv-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+  .pv-option {
+    display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--pv-border); border-radius: 4px;
+    padding: 13px 16px; background: var(--pv-surface); font-size: 14.5px; line-height: 1.5;
+  }
+  .pv-option:hover { border-color: var(--pv-accent); }
+  .pv-option.selected { border-color: var(--pv-accent); background: var(--pv-accent-soft); }
+  .pv-option-letter {
+    font-family: var(--font-display); font-weight: 700; width: 22px; height: 22px; border-radius: 50%;
+    border: 1px solid var(--pv-border); display: flex; align-items: center; justify-content: center;
+    font-size: 12px; flex-shrink: 0; background: #fff;
+  }
+  .pv-option.selected .pv-option-letter { background: var(--pv-accent); border-color: var(--pv-accent); color: #fff; }
+  .pv-actions { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; border-top: 1px solid var(--pv-border); padding-top: 20px; }
+  .pv-actions .left, .pv-actions .right { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .pv-proctor {
+    position: fixed; bottom: 16px; right: 16px; width: 160px; background: var(--pv-ink); border-radius: 6px;
+    overflow: hidden; z-index: 60; box-shadow: 0 4px 16px rgba(0,0,0,0.3); display: none;
+  }
+  .pv-proctor.active { display: block; }
+  .pv-proctor video { width: 100%; display: block; background: #000; }
+  .pv-proctor-status { font-family: var(--font-display); font-size: 10px; color: #9fd4a3; padding: 5px 8px; }
+
+  .pv-toast {
+    position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 70;
+    background: var(--pv-danger); color: #fff; padding: 12px 20px; border-radius: 4px; font-size: 13.5px;
+    display: none; box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  }
+
+  /* ---------- Review + report ---------- */
+  #review-screen, #report-screen { display: none; min-height: 100vh; padding: 40px 20px; }
+  .pv-panel { max-width: 900px; margin: 0 auto; background: var(--pv-surface); border: 1px solid var(--pv-border); border-radius: 4px; padding: 36px; }
+  .pv-panel h2 { margin: 0 0 6px; font-size: 21px; }
+  .pv-panel p.sub { color: var(--pv-muted); font-size: 14px; margin: 0 0 24px; }
+  .review-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); gap: 8px; margin-bottom: 28px; }
+  .review-actions { display: flex; justify-content: space-between; border-top: 1px solid var(--pv-border); padding-top: 20px; }
+
+  .score-block { display: flex; align-items: center; gap: 28px; margin-bottom: 28px; flex-wrap: wrap; }
+  .score-circle {
+    width: 120px; height: 120px; border-radius: 50%; border: 6px solid var(--pv-accent);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .score-circle .num { font-family: var(--font-display); font-size: 26px; font-weight: 700; }
+  .score-circle .lbl { font-size: 10px; color: var(--pv-muted); }
+  .pass-pill { display: inline-block; padding: 6px 14px; border-radius: 3px; font-family: var(--font-display); font-size: 12.5px; font-weight: 700; letter-spacing: 0.04em; }
+  .pass-pill.pass { background: var(--pv-success-soft); color: var(--pv-success); }
+  .pass-pill.fail { background: var(--pv-danger-soft); color: var(--pv-danger); }
+  .domain-row { margin-bottom: 12px; }
+  .domain-row .row-top { display: flex; justify-content: space-between; font-family: var(--font-display); font-size: 12px; margin-bottom: 4px; }
+  .domain-bar { height: 6px; background: #eef0f3; border-radius: 3px; overflow: hidden; }
+  .domain-bar-fill { height: 100%; }
+  .review-q-card { border: 1px solid var(--pv-border); border-radius: 4px; padding: 16px; margin-bottom: 12px; }
+  .review-q-tag { font-family: var(--font-display); font-size: 11px; padding: 2px 8px; border-radius: 3px; }
+  .review-q-tag.correct { background: var(--pv-success-soft); color: var(--pv-success); }
+  .review-q-tag.incorrect { background: var(--pv-danger-soft); color: var(--pv-danger); }
+  .btn-pv-secondary { background: #fff; color: var(--pv-ink); border: 1px solid var(--pv-border); padding: 12px 18px; border-radius: 3px; font-size: 14px; }
+
+  @media (max-width: 760px) {
+    .pv-palette { display: none; }
+    .pv-question-pane { padding: 20px 16px; }
+    .pv-topbar { font-size: 11px; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="watermark-layer" id="watermark"></div>
+
+<!-- ============ GATE SCREEN ============ -->
+<div id="gate-screen">
+  <div class="gate-card">
+    <span class="gate-seal">🔒 Secure Test Environment</span>
+    <h1>SC-200 Pearson VUE Real Exam Simulation</h1>
+    <p class="sub">Microsoft Certified: Security Operations Analyst Associate — 50 items, 100 minutes, blueprint-weighted question distribution.</p>
+    <ul class="gate-rules">
+      <li>This is a closed environment. Leaving the tab, losing window focus, or copying content will be logged as an integrity strike. Three strikes ends the exam automatically.</li>
+      <li>The timer starts the moment you begin and is enforced by the server — it does not pause on refresh.</li>
+      <li>Answers are not scored until you submit. You will not see correct answers during the exam.</li>
+      <li>If you reload this page mid-exam, your session and remaining time will resume automatically.</li>
+      <li>Camera access will be requested for AI proctoring. If denied, the exam continues in simulated-proctor mode.</li>
+    </ul>
+    <div class="gate-actions">
+      <button class="btn-pv-primary" id="btn-begin-exam" onclick="beginExam()">Begin Secure Exam &rarr;</button>
+      <button class="btn-pv-ghost" onclick="window.location.href='practice.html'">Return to Practice Hub</button>
+    </div>
+    <div id="gate-error"></div>
+  </div>
+</div>
+
+<!-- ============ EXAM SHELL ============ -->
+<div id="exam-shell">
+  <div class="pv-topbar">
+    <span class="pv-lock">● LIVE PROCTORED SESSION</span>
+    <span class="pv-candidate">Candidate: <span id="cand-email">—</span> · SC-200</span>
+    <span class="pv-spacer"></span>
+    <span class="pv-strikes" id="pv-strikes">Integrity: 0/3</span>
+    <span class="pv-timer" id="pv-timer">100:00</span>
+  </div>
+
+  <div class="pv-body">
+    <aside class="pv-palette">
+      <h4>Item Navigator</h4>
+      <div class="pv-palette-grid" id="pv-palette-grid"></div>
+    </aside>
+
+    <main class="pv-question-pane">
+      <div class="pv-item-meta">
+        <span id="pv-itemnum">Item 1 of 50</span>
+        <span id="pv-modtag">MODULE</span>
+      </div>
+      <div class="pv-scenario" id="pv-scenario">Loading scenario…</div>
+      <div class="pv-question" id="pv-question">Loading prompt…</div>
+      <div class="pv-options" id="pv-options"></div>
+
+      <div class="pv-actions">
+        <div class="left">
+          <button class="btn-pv-secondary" id="btn-prev" onclick="prevItem()" disabled>&larr; Previous</button>
+          <button class="btn-pv-secondary" id="btn-flag" onclick="toggleFlag()">Flag for Review</button>
+        </div>
+        <div class="right">
+          <button class="btn-pv-secondary" onclick="goToReview()">Review All Items</button>
+          <button class="btn-pv-primary" id="btn-next" onclick="nextItem()">Next &rarr;</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="pv-proctor" id="pv-proctor">
+  <video id="pv-video" autoplay playsinline muted></video>
+  <div class="pv-proctor-status" id="pv-proctor-status">AI PROCTOR: ACTIVE</div>
+</div>
+
+<div class="pv-toast" id="pv-toast"></div>
+
+<!-- ============ REVIEW SCREEN ============ -->
+<div id="review-screen">
+  <div class="pv-panel">
+    <h2>Review Before Submitting</h2>
+    <p class="sub">Click any item to jump back to it. Once submitted, the exam cannot be reopened.</p>
+    <div class="review-grid" id="review-grid"></div>
+    <div class="review-actions">
+      <button class="btn-pv-secondary" onclick="returnToExam()">Return to Exam</button>
+      <button class="btn-pv-primary" onclick="confirmSubmit()">Submit Exam &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ REPORT SCREEN ============ -->
+<div id="report-screen">
+  <div class="pv-panel">
+    <h2>Diagnostic Score Report</h2>
+    <p class="sub">SC-200 Microsoft Certified Security Operations Analyst Associate</p>
+
+    <div class="score-block">
+      <div class="score-circle">
+        <div class="num" id="report-score">—</div>
+        <div class="lbl">/ 1000</div>
+      </div>
+      <div>
+        <span class="pass-pill" id="report-pass-pill">—</span>
+        <div style="margin-top:10px; font-size:13px; color:var(--pv-muted);" id="report-meta"></div>
+      </div>
+    </div>
+
+    <h4 style="margin-bottom:10px;">Domain Breakdown</h4>
+    <div id="report-domains" style="margin-bottom:28px;"></div>
+
+    <h4 style="margin-bottom:14px;">Full Item Review</h4>
+    <div id="report-review"></div>
+
+    <div style="display:flex; justify-content:center; gap:12px; margin-top:28px; flex-wrap:wrap;">
+      <button class="btn-pv-secondary" onclick="window.location.href='practice.html'">Return to Practice Hub</button>
+      <button class="btn-pv-primary" onclick="window.location.reload()">Start a New Pearson VUE Exam &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------------- State ----------------
+  let currentUser = null;
+  let sessionId = null;
+  let questions = [];             // sanitized questions from server (no answer key)
+  let shuffleMap = {};            // qid -> array mapping displayed position -> original option index
+  let userAnswers = {};           // qid -> ORIGINAL option index (never shuffled index)
+  let flagged = {};
+  let itemIndex = 0;
+  let strikes = 0;
+  let timerHandle = null;
+  let serverStartEpoch = 0;
+  let durationSeconds = 100 * 60;
+  let proctorStream = null;
+  let proctorInterval = null;
+  let submitted = false;
+
+  const SESSION_KEY = 'sc200_pearson_session';
+
+  document.addEventListener('DOMContentLoaded', init);
+
+  async function init() {
+    const savedUser = localStorage.getItem('sc200_user');
+    if (!savedUser) { window.location.href = 'practice.html'; return; }
+    currentUser = JSON.parse(savedUser);
+    document.getElementById('cand-email').innerText = currentUser.email;
+    paintWatermark(currentUser.email);
+
+    initIntegrityMonitoring();
+
+    const saved = localStorage.getItem(SESSION_KEY);
+    if (saved) {
+      const { sessionId: sid } = JSON.parse(saved);
+      const resumed = await tryResumeSession(sid);
+      if (resumed) return;
+    }
+    // No live session — show the gate screen (already visible by default).
+  }
+
+  function paintWatermark(email) {
+    const label = `${email}  ·  SC-200  ·  ${new Date().toLocaleDateString()}`;
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='340' height='170'>
+      <text x='10' y='50' font-family='JetBrains Mono, monospace' font-size='12' fill='rgba(11,61,145,0.16)' transform='rotate(-18 170 85)'>${label}</text>
+      <text x='10' y='140' font-family='JetBrains Mono, monospace' font-size='12' fill='rgba(11,61,145,0.16)' transform='rotate(-18 170 85)'>${label}</text>
+    </svg>`;
+    document.getElementById('watermark').style.backgroundImage =
+      `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
+  }
+
+  // ---------------- Session start / resume ----------------
+  async function beginExam() {
+    document.getElementById('gate-error').style.display = 'none';
+    document.getElementById('btn-begin-exam').disabled = true;
+    document.getElementById('btn-begin-exam').innerText = 'Starting exam…';
+
+    try {
+      const res = await fetch('/api/pearson/start', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userEmail: currentUser.email, examCode: 'SC-200', totalQuestions: 50 })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Could not start exam.');
+
+      sessionId = data.sessionId;
+      questions = data.questions;
+      serverStartEpoch = data.serverStartTime;
+      durationSeconds = data.durationSeconds;
+      buildShuffleMap();
+      localStorage.setItem(SESSION_KEY, JSON.stringify({ sessionId }));
+
+      await initProctoring();
+      enterExamShell();
+    } catch (err) {
+      document.getElementById('gate-error').innerText = err.message || 'Failed to reach the exam server.';
+      document.getElementById('gate-error').style.display = 'block';
+      document.getElementById('btn-begin-exam').disabled = false;
+      document.getElementById('btn-begin-exam').innerText = 'Begin Secure Exam →';
+    }
+  }
+
+  async function tryResumeSession(sid) {
+    try {
+      const res = await fetch(`/api/pearson/session?sessionId=${encodeURIComponent(sid)}&email=${encodeURIComponent(currentUser.email)}`);
+      const data = await res.json();
+      if (!data.success || data.submitted) {
+        localStorage.removeItem(SESSION_KEY);
+        return false;
+      }
+      sessionId = sid;
+      questions = data.questions;
+      durationSeconds = data.durationSeconds;
+      serverStartEpoch = Math.floor(Date.now() / 1000) - (durationSeconds - data.remainingSeconds);
+      buildShuffleMap();
+      await initProctoring();
+      enterExamShell();
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  function enterExamShell() {
+    document.getElementById('gate-screen').style.display = 'none';
+    document.getElementById('exam-shell').style.display = 'flex';
+    itemIndex = 0;
+    renderPalette();
+    renderItem();
+    startTimer();
+  }
+
+  // Random per-question option order, tracked as a mapping so we can submit
+  // the ORIGINAL option index back to the server without ever knowing which
+  // one is correct on the client.
+  function buildShuffleMap() {
+    shuffleMap = {};
+    questions.forEach(q => {
+      const idx = q.options.map((_, i) => i);
+      for (let i = idx.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [idx[i], idx[j]] = [idx[j], idx[i]];
+      }
+      shuffleMap[q.id] = idx; // displayed position -> original index
+    });
+  }
+
+  // ---------------- Timer ----------------
+  function startTimer() {
+    clearInterval(timerHandle);
+    tickTimer();
+    timerHandle = setInterval(tickTimer, 1000);
+  }
+
+  function tickTimer() {
+    const elapsed = Math.floor(Date.now() / 1000) - serverStartEpoch;
+    const remaining = Math.max(0, durationSeconds - elapsed);
+    const mins = Math.floor(remaining / 60), secs = remaining % 60;
+    const el = document.getElementById('pv-timer');
+    el.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    el.classList.toggle('low', remaining <= 300);
+    if (remaining <= 0) {
+      clearInterval(timerHandle);
+      showToast('Time expired — submitting your exam automatically.');
+      submitExam();
+    }
+  }
+
+  // ---------------- Rendering ----------------
+  function renderPalette() {
+    const grid = document.getElementById('pv-palette-grid');
+    grid.innerHTML = '';
+    questions.forEach((q, i) => {
+      const node = document.createElement('div');
+      node.className = 'pv-pnode';
+      if (userAnswers[q.id] !== undefined) node.classList.add('answered');
+      if (flagged[q.id]) node.classList.add('flagged');
+      if (i === itemIndex) node.classList.add('current');
+      node.innerText = i + 1;
+      node.onclick = () => { itemIndex = i; renderPalette(); renderItem(); };
+      grid.appendChild(node);
+    });
+  }
+
+  function renderItem() {
+    const q = questions[itemIndex];
+    document.getElementById('pv-itemnum').innerText = `Item ${itemIndex + 1} of ${questions.length}`;
+    document.getElementById('pv-modtag').innerText = `MODULE: ${q.module.toUpperCase()}`;
+    document.getElementById('pv-scenario').innerText = q.scenario;
+    document.getElementById('pv-question').innerText = q.question;
+    document.getElementById('btn-prev').disabled = (itemIndex === 0);
+    document.getElementById('btn-next').innerText = (itemIndex === questions.length - 1) ? 'Review & End Exam →' : 'Next →';
+    document.getElementById('btn-flag').innerText = flagged[q.id] ? '★ Flagged' : 'Flag for Review';
+
+    const order = shuffleMap[q.id];
+    const container = document.getElementById('pv-options');
+    container.innerHTML = '';
+    order.forEach((origIdx, pos) => {
+      const letter = String.fromCharCode(65 + pos);
+      const item = document.createElement('div');
+      item.className = 'pv-option';
+      if (userAnswers[q.id] === origIdx) item.classList.add('selected');
+      item.onclick = () => selectOption(origIdx);
+      item.innerHTML = `<div class="pv-option-letter">${letter}</div><div>${q.options[origIdx]}</div>`;
+      container.appendChild(item);
+    });
+  }
+
+  function selectOption(originalIndex) {
+    const q = questions[itemIndex];
+    userAnswers[q.id] = originalIndex;
+    renderPalette();
+    renderItem();
+  }
+
+  function toggleFlag() {
+    const q = questions[itemIndex];
+    flagged[q.id] = !flagged[q.id];
+    renderPalette();
+    renderItem();
+  }
+
+  function prevItem() { if (itemIndex > 0) { itemIndex--; renderPalette(); renderItem(); } }
+  function nextItem() {
+    if (itemIndex < questions.length - 1) { itemIndex++; renderPalette(); renderItem(); }
+    else goToReview();
+  }
+
+  // ---------------- Review + submit ----------------
+  function goToReview() {
+    const grid = document.getElementById('review-grid');
+    grid.innerHTML = '';
+    questions.forEach((q, i) => {
+      const node = document.createElement('div');
+      node.className = 'pv-pnode';
+      if (userAnswers[q.id] !== undefined) node.classList.add('answered');
+      if (flagged[q.id]) node.classList.add('flagged');
+      node.innerText = i + 1;
+      node.onclick = () => { itemIndex = i; returnToExam(); };
+      grid.appendChild(node);
+    });
+    document.getElementById('exam-shell').style.display = 'none';
+    document.getElementById('review-screen').style.display = 'block';
+  }
+
+  function returnToExam() {
+    document.getElementById('review-screen').style.display = 'none';
+    document.getElementById('exam-shell').style.display = 'flex';
+    renderPalette();
+    renderItem();
+  }
+
+  function confirmSubmit() {
+    const answered = Object.keys(userAnswers).length;
+    if (confirm(`You have answered ${answered} of ${questions.length} items. Submit the exam now? This cannot be undone.`)) {
+      submitExam();
+    }
+  }
+
+  async function submitExam() {
+    if (submitted) return;
+    submitted = true;
+    clearInterval(timerHandle);
+    stopProctoring();
+
+    try {
+      const res = await fetch('/api/pearson/submit', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, userEmail: currentUser.email, userAnswers, proctorStrikes: strikes })
+      });
+      const data = await res.json();
+      localStorage.removeItem(SESSION_KEY);
+      if (!data.success) { alert(data.error || 'Submission failed.'); return; }
+      renderReport(data);
+    } catch (err) {
+      alert('Could not reach the exam server to submit. Check your connection and try again.');
+      submitted = false;
+    }
+  }
+
+  function renderReport(data) {
+    document.getElementById('exam-shell').style.display = 'none';
+    document.getElementById('review-screen').style.display = 'none';
+    document.getElementById('report-screen').style.display = 'block';
+
+    document.getElementById('report-score').innerText = data.score;
+    const pill = document.getElementById('report-pass-pill');
+    pill.className = `pass-pill ${data.passed ? 'pass' : 'fail'}`;
+    pill.innerText = data.passed ? 'PASSED · Threshold 700' : 'FAILED · Threshold 700';
+    const mins = Math.floor(data.timeSpentSeconds / 60);
+    document.getElementById('report-meta').innerText =
+      `${data.correctQuestions} of ${data.totalQuestions} correct · ${mins} min elapsed · ${strikes} integrity strike(s)`;
+
+    let domHTML = '';
+    Object.keys(data.domainStats).forEach(mod => {
+      const s = data.domainStats[mod];
+      if (!s.total) return;
+      const pct = Math.round((s.correct / s.total) * 100);
+      domHTML += `<div class="domain-row">
+        <div class="row-top"><span>${mod.toUpperCase()} (${s.correct}/${s.total})</span><span>${pct}%</span></div>
+        <div class="domain-bar"><div class="domain-bar-fill" style="width:${pct}%; background:${pct >= 70 ? 'var(--pv-success)' : 'var(--pv-danger)'};"></div></div>
+      </div>`;
+    });
+    document.getElementById('report-domains').innerHTML = domHTML;
+
+    let reviewHTML = '';
+    questions.forEach((q, i) => {
+      const info = data.review[q.id] || {};
+      const uAns = userAnswers[q.id];
+      const isCorrect = uAns === info.correctIndex;
+      const yourChoice = uAns !== undefined ? q.options[uAns] : 'Not answered';
+      const correctChoice = info.correctIndex !== undefined ? q.options[info.correctIndex] : '—';
+      const exp = info.explanation || {};
+      reviewHTML += `<div class="review-q-card">
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+          <span class="review-q-tag ${isCorrect ? 'correct' : 'incorrect'}">Q${i + 1} · ${q.module.toUpperCase()} · ${isCorrect ? 'CORRECT' : 'INCORRECT'}</span>
+        </div>
+        <div style="font-weight:600; margin-bottom:6px;">${q.question}</div>
+        <div style="font-size:13px; color:var(--pv-muted); margin-bottom:8px;">
+          Your choice: ${yourChoice} &nbsp;|&nbsp; <strong style="color:var(--pv-success);">Correct: ${correctChoice}</strong>
+        </div>
+        ${exp.concept ? `<div style="font-size:13px; background:#f7f8fa; border-radius:4px; padding:10px;"><strong>${exp.concept}</strong>${exp.docRef ? `<br><span style="color:var(--pv-muted);">Doc ref: ${exp.docRef}</span>` : ''}</div>` : ''}
+      </div>`;
+    });
+    document.getElementById('report-review').innerHTML = reviewHTML;
+  }
+
+  // ---------------- Integrity monitoring ----------------
+  function initIntegrityMonitoring() {
+    const isLive = () => document.getElementById('exam-shell').style.display === 'flex';
+
+    document.addEventListener('visibilitychange', () => { if (isLive() && document.hidden) strike('Tab switch / window focus lost'); });
+    window.addEventListener('blur', () => { if (isLive()) strike('Browser window lost focus'); });
+    document.addEventListener('contextmenu', e => { if (isLive()) e.preventDefault(); });
+    document.addEventListener('copy', e => { if (isLive()) { e.preventDefault(); showToast('Copying exam content is disabled.'); } });
+    document.addEventListener('selectstart', e => { if (isLive()) e.preventDefault(); });
+  }
+
+  function strike(reason) {
+    strikes++;
+    const el = document.getElementById('pv-strikes');
+    el.innerText = `Integrity: ${strikes}/3`;
+    el.classList.toggle('hot', strikes >= 2);
+    showToast(`Integrity warning: ${reason}`);
+
+    fetch('/api/proctor/log', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userEmail: currentUser.email, eventType: 'STRIKE', details: reason })
+    }).catch(() => {});
+
+    if (strikes >= 3 && !submitted) {
+      showToast('Maximum integrity strikes exceeded — exam terminated.');
+      submitExam();
+    }
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('pv-toast');
+    toast.innerText = msg;
+    toast.style.display = 'block';
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => { toast.style.display = 'none'; }, 4000);
+  }
+
+  // ---------------- Webcam proctoring ----------------
+  async function initProctoring() {
+    try {
+      proctorStream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } });
+      document.getElementById('pv-video').srcObject = proctorStream;
+      document.getElementById('pv-proctor').classList.add('active');
+      document.getElementById('pv-proctor-status').innerText = 'AI PROCTOR: ACTIVE';
+    } catch (err) {
+      document.getElementById('pv-proctor').classList.add('active');
+      document.getElementById('pv-proctor-status').innerText = 'PROCTOR: SIMULATED (no camera)';
+    }
+  }
+
+  function stopProctoring() {
+    clearInterval(proctorInterval);
+    if (proctorStream) { proctorStream.getTracks().forEach(t => t.stop()); proctorStream = null; }
+    document.getElementById('pv-proctor').classList.remove('active');
+  }
+</script>
+</body>
+</html>

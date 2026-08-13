@@ -8,11 +8,25 @@ import sqlite3
 import json
 import urllib.parse
 import hashlib
+import re
 import time
+import uuid
+import random
 
 PORT = 8080
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(DIRECTORY, "sc200_database.sqlite")
+
+# Blueprint-weighted module distribution for the 50-question Pearson VUE exam.
+# These are placeholder proportions -- Microsoft doesn't publish per-product
+# weights under the current SC-200 blueprint, so this approximates emphasis.
+MODULE_WEIGHTS = {
+    "xdr": 0.30,      # Defender XDR
+    "mde": 0.25,      # Defender for Endpoint
+    "mdc": 0.20,      # Defender for Cloud
+    "purview": 0.15,  # Microsoft Purview
+    "copilot": 0.10,  # Copilot for Security
+}
 
 def hash_password(password):
     return hashlib.sha256(password.encode('utf-8')).hexdigest()
@@ -84,6 +98,22 @@ def init_sqlite_db():
         )
     ''')
 
+    # Pearson VUE Live Session Table (server-side answer key never sent to client)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS pearson_sessions (
+            session_id TEXT PRIMARY KEY,
+            user_email TEXT NOT NULL,
+            exam_code TEXT NOT NULL,
+            question_ids TEXT NOT NULL,
+            answer_key TEXT NOT NULL,
+            explanation_key TEXT NOT NULL,
+            module_key TEXT NOT NULL,
+            duration_seconds INTEGER NOT NULL,
+            started_at INTEGER NOT NULL,
+            submitted INTEGER DEFAULT 0
+        )
+    ''')
+
     # Proctor Logs Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS proctor_logs (
@@ -92,6 +122,14 @@ def init_sqlite_db():
             event_type TEXT NOT NULL,
             details TEXT NOT NULL,
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    # System Meta Table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS system_meta (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
         )
     ''')
 
@@ -104,31 +142,75 @@ def init_sqlite_db():
                        ("admin@soc.microsoft.com", hash_password("MasterAdmin2026!"), "SOC Lead Administrator", "admin"))
         print("[+] Created default user & admin accounts in SQLite.")
 
-    # Populate 500 questions from sc200_questions.js if empty
-    cursor.execute("SELECT COUNT(*) FROM questions")
-    if cursor.fetchone()[0] == 0:
-        js_file = os.path.join(DIRECTORY, "sc200_questions.js")
-        if os.path.exists(js_file):
+    # Rebuild questions table from sc200_questions.js ONLY if modified
+    js_file = os.path.join(DIRECTORY, "sc200_questions.js")
+    if os.path.exists(js_file):
+        current_mtime = str(os.path.getmtime(js_file))
+        cursor.execute("SELECT value FROM system_meta WHERE key = 'questions_js_mtime'")
+        row = cursor.fetchone()
+        stored_mtime = row[0] if row else None
+
+        if stored_mtime != current_mtime:
+            print("[+] sc200_questions.js has changed (or first run). Rebuilding SQLite questions table...")
+            cursor.execute("DELETE FROM questions")
             try:
                 with open(js_file, 'r', encoding='utf-8') as f:
                     content = f.read()
-                    json_str = content.split('const SC200_QUESTIONS = ')[1].split(';\n\nif (typeof window')[0]
-                    questions_data = json.loads(json_str)
-                    
-                    for q in questions_data:
-                        cursor.execute('''
-                            INSERT INTO questions (id, exam_code, module, topic, scenario, question, options, correct_index, audio_summary, explanation)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        ''', (
-                            q['id'], 'SC-200', q['module'], q['topic'], q['scenario'], q['question'],
-                            json.dumps(q['options']), q['correctIndex'], q['audioSummary'], json.dumps(q['explanation'])
-                        ))
-                    print(f"[+] Successfully loaded {len(questions_data)} questions into SQLite database.")
+                    match = re.search(r"const\s+SC200_QUESTIONS\s*=\s*(\[[\s\S]*?\]);\s*const", content)
+                    if not match:
+                        match = re.search(r"const\s+SC200_QUESTIONS\s*=\s*(\[[\s\S]*?\]);", content)
+                    if match:
+                        json_str = match.group(1)
+                        questions_data = json.loads(json_str)
+                        
+                        for q in questions_data:
+                            cursor.execute('''
+                                INSERT INTO questions (id, exam_code, module, topic, scenario, question, options, correct_index, audio_summary, explanation)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            ''', (
+                                q.get('id', ''), 'SC-200', q.get('module', ''), q.get('topic', ''), q.get('scenario', ''), q.get('question', ''),
+                                json.dumps(q.get('options', [])), q.get('correctIndex', 0), q.get('audioSummary', ''), json.dumps(q.get('explanation', {}))
+                            ))
+                        
+                        cursor.execute("INSERT OR REPLACE INTO system_meta (key, value) VALUES (?, ?)", ('questions_js_mtime', current_mtime))
+                        print(f"[+] Successfully loaded {len(questions_data)} questions into SQLite database.")
             except Exception as e:
                 print(f"[!] Warning: Could not auto-populate SQLite questions: {e}")
+        else:
+            print("[+] Question bank is up to date (no JS changes detected). Skipping rebuild.")
 
     conn.commit()
     conn.close()
+
+def build_weighted_question_set(total_questions=50):
+    """Samples questions per MODULE_WEIGHTS using the largest-remainder method
+    so a 50-question exam lands on an authentic blueprint-weighted split."""
+    raw = {mod: w * total_questions for mod, w in MODULE_WEIGHTS.items()}
+    base = {mod: int(v) for mod, v in raw.items()}
+    remainder = total_questions - sum(base.values())
+    by_remainder = sorted(raw.items(), key=lambda kv: kv[1] - int(kv[1]), reverse=True)
+    for i in range(remainder):
+        base[by_remainder[i % len(by_remainder)][0]] += 1
+
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    selected = []
+    for mod, count in base.items():
+        if count <= 0:
+            continue
+        cursor.execute('''
+            SELECT id, exam_code, module, topic, scenario, question, options, correct_index, audio_summary, explanation
+            FROM questions WHERE module = ? ORDER BY RANDOM() LIMIT ?
+        ''', (mod, count))
+        for r in cursor.fetchall():
+            selected.append({
+                "id": r[0], "examCode": r[1], "module": r[2], "topic": r[3],
+                "scenario": r[4], "question": r[5], "options": json.loads(r[6]),
+                "correctIndex": r[7], "audioSummary": r[8], "explanation": json.loads(r[9])
+            })
+    conn.close()
+    random.shuffle(selected)
+    return selected
 
 init_sqlite_db()
 
@@ -236,28 +318,118 @@ class RESTHandler(http.server.SimpleHTTPRequestHandler):
             self._send_json({"success": True, "message": "Practice session saved to SQLite."})
             return
 
-        elif path == '/api/pearson/submit':
+        elif path == '/api/pearson/start':
             email = body.get('userEmail', 'guest@soc.microsoft.com')
             exam_code = body.get('examCode', 'SC-200')
-            score = body.get('score', 0)
-            passed = 1 if score >= 700 else 0
-            total_q = body.get('totalQuestions', 0)
-            correct_q = body.get('correctQuestions', 0)
-            domain_stats = json.dumps(body.get('domainStats', {}))
-            user_answers = json.dumps(body.get('userAnswers', {}))
-            strikes = body.get('proctorStrikes', 0)
-            time_spent = body.get('timeSpentSeconds', 0)
+            total_q = body.get('totalQuestions', 50)
+
+            full_questions = build_weighted_question_set(total_q)
+            if not full_questions:
+                self._send_json({"success": False, "error": "Question bank is empty or not loaded yet."}, status=400)
+                return
+
+            session_id = str(uuid.uuid4())
+            question_ids = [q['id'] for q in full_questions]
+            answer_key = {q['id']: q['correctIndex'] for q in full_questions}
+            explanation_key = {q['id']: q['explanation'] for q in full_questions}
+            module_key = {q['id']: q['module'] for q in full_questions}
+            duration_seconds = 100 * 60
+            started_at = int(time.time())
 
             conn = sqlite3.connect(DB_FILE)
             cursor = conn.cursor()
             cursor.execute('''
-                INSERT INTO pearson_exams (user_email, exam_code, score, passed, total_questions, correct_questions, domain_stats, user_answers, proctor_strikes, time_spent_seconds)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (email, exam_code, score, passed, total_q, correct_q, domain_stats, user_answers, strikes, time_spent))
+                INSERT INTO pearson_sessions (session_id, user_email, exam_code, question_ids, answer_key, explanation_key, module_key, duration_seconds, started_at, submitted)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+            ''', (session_id, email, exam_code, json.dumps(question_ids), json.dumps(answer_key),
+                  json.dumps(explanation_key), json.dumps(module_key), duration_seconds, started_at))
             conn.commit()
             conn.close()
 
-            self._send_json({"success": True, "message": "Pearson VUE Exam Diagnostic saved to SQLite."})
+            # Strip correctIndex/explanation -- the client never sees the answer key.
+            sanitized = [{k: v for k, v in q.items() if k not in ('correctIndex', 'explanation')} for q in full_questions]
+
+            self._send_json({
+                "success": True,
+                "sessionId": session_id,
+                "questions": sanitized,
+                "serverStartTime": started_at,
+                "durationSeconds": duration_seconds
+            })
+            return
+
+        elif path == '/api/pearson/submit':
+            session_id = body.get('sessionId', '')
+            email = body.get('userEmail', 'guest@soc.microsoft.com')
+            user_answers = body.get('userAnswers', {})
+            strikes = body.get('proctorStrikes', 0)
+
+            conn = sqlite3.connect(DB_FILE)
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT user_email, exam_code, question_ids, answer_key, explanation_key, module_key, duration_seconds, started_at, submitted
+                FROM pearson_sessions WHERE session_id = ?
+            ''', (session_id,))
+            row = cursor.fetchone()
+
+            if not row or row[0] != email:
+                conn.close()
+                self._send_json({"success": False, "error": "Exam session not found."}, status=404)
+                return
+
+            _, exam_code, question_ids_json, answer_key_json, explanation_key_json, module_key_json, duration_seconds, started_at, submitted = row
+
+            if submitted:
+                conn.close()
+                self._send_json({"success": False, "error": "This exam has already been submitted."}, status=400)
+                return
+
+            question_ids = json.loads(question_ids_json)
+            answer_key = json.loads(answer_key_json)
+            explanation_key = json.loads(explanation_key_json)
+            module_key = json.loads(module_key_json)
+
+            time_spent = max(0, min(int(time.time()) - started_at, duration_seconds))
+
+            correct_count = 0
+            domain_stats = {}
+            review = {}
+            for qid in question_ids:
+                mod = module_key.get(qid, 'unknown')
+                domain_stats.setdefault(mod, {"correct": 0, "total": 0})
+                domain_stats[mod]["total"] += 1
+
+                correct_idx = answer_key.get(qid)
+                user_idx = user_answers.get(qid)
+                if user_idx is not None and user_idx == correct_idx:
+                    correct_count += 1
+                    domain_stats[mod]["correct"] += 1
+
+                review[qid] = {"correctIndex": correct_idx, "explanation": explanation_key.get(qid, {})}
+
+            total_q = len(question_ids)
+            score = round((correct_count / total_q) * 1000) if total_q else 0
+            passed = 1 if score >= 700 else 0
+
+            cursor.execute("UPDATE pearson_sessions SET submitted = 1 WHERE session_id = ?", (session_id,))
+            cursor.execute('''
+                INSERT INTO pearson_exams (user_email, exam_code, score, passed, total_questions, correct_questions, domain_stats, user_answers, proctor_strikes, time_spent_seconds)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (email, exam_code, score, passed, total_q, correct_count, json.dumps(domain_stats),
+                  json.dumps(user_answers), strikes, time_spent))
+            conn.commit()
+            conn.close()
+
+            self._send_json({
+                "success": True,
+                "score": score,
+                "passed": bool(passed),
+                "totalQuestions": total_q,
+                "correctQuestions": correct_count,
+                "timeSpentSeconds": time_spent,
+                "domainStats": domain_stats,
+                "review": review
+            })
             return
 
         elif path == '/api/proctor/log':
@@ -322,6 +494,61 @@ class RESTHandler(http.server.SimpleHTTPRequestHandler):
                 })
 
             self._send_json({"success": True, "history": history})
+            return
+
+        elif path == '/api/pearson/session':
+            session_id = query.get('sessionId', [''])[0]
+            email = query.get('email', [''])[0]
+
+            conn = sqlite3.connect(DB_FILE)
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT user_email, question_ids, duration_seconds, started_at, submitted
+                FROM pearson_sessions WHERE session_id = ?
+            ''', (session_id,))
+            row = cursor.fetchone()
+
+            if not row or row[0] != email:
+                conn.close()
+                self._send_json({"success": False, "error": "Session not found."}, status=404)
+                return
+
+            _, question_ids_json, duration_seconds, started_at, submitted = row
+            if submitted:
+                conn.close()
+                self._send_json({"success": True, "submitted": True})
+                return
+
+            question_ids = json.loads(question_ids_json)
+            placeholders = ','.join(['?'] * len(question_ids))
+            cursor.execute(f'''
+                SELECT id, exam_code, module, topic, scenario, question, options, audio_summary
+                FROM questions WHERE id IN ({placeholders})
+            ''', question_ids)
+            by_id = {r[0]: r for r in cursor.fetchall()}
+            conn.close()
+
+            questions = []
+            for qid in question_ids:
+                r = by_id.get(qid)
+                if not r:
+                    continue
+                questions.append({
+                    "id": r[0], "examCode": r[1], "module": r[2], "topic": r[3],
+                    "scenario": r[4], "question": r[5], "options": json.loads(r[6]),
+                    "audioSummary": r[7]
+                })
+
+            elapsed = int(time.time()) - started_at
+            remaining = max(0, duration_seconds - elapsed)
+
+            self._send_json({
+                "success": True,
+                "submitted": False,
+                "questions": questions,
+                "durationSeconds": duration_seconds,
+                "remainingSeconds": remaining
+            })
             return
 
         elif path == '/api/questions/random':

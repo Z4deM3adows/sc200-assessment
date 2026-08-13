@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Microsoft Security Operations Platform Master Assessment Engine (SC-200 & Pearson VUE Exam Simulation)</title>
-  <meta name="description" content="Enterprise SC-200 & Pearson VUE Certification Exam Simulator with 500 scenario practice questions, WebRTC AI Camera Invigilator, Anti-Cheat Tab Lock, SQLite persistence, and Web Speech synthesis.">
+  <title>SC-200 Practice Hub — Domain Revision & Master Assessment</title>
+  <meta name="description" content="SC-200 domain revision practice hub — 500 scenario practice questions with instant feedback, KQL explanations, and audio walkthroughs. Launches the standalone Pearson VUE exam simulator for full test-center conditions.">
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,19 +44,9 @@
     </div>
   </header>
 
-  <!-- WEBCAM AI INVIGILATOR FLOATING HUD -->
-  <div class="proctor-hud-box" id="proctor-hud">
-    <div class="proctor-video-wrapper">
-      <video id="proctor-video" autoplay playsinline muted></video>
-      <canvas id="proctor-canvas" style="display:none;"></canvas>
-    </div>
-    <div class="proctor-status-bar">
-      <span class="proctor-badge" id="proctor-status">AI PROCTOR: ACTIVE</span>
-      <span class="proctor-strikes" id="lbl-strikes">STRIKES: 0/3</span>
-    </div>
-    <div class="proctor-warning-banner" id="proctor-warning">
-      ⚠️ WARNING: Head turned away or hand near frame!
-    </div>
+  <!-- Lightweight tab-lock warning banner for timed "Exam" revision submode (no webcam — that's Pearson VUE only) -->
+  <div class="proctor-warning-banner" id="proctor-warning" style="display:none; position:fixed; top:70px; right:20px; z-index:999;">
+    ⚠️ Focus lost — timed revision requires staying on this tab.
   </div>
 
   <!-- Main Workspace Content -->
@@ -73,22 +63,17 @@
         <form id="form-login" onsubmit="handleLogin(event)">
           <div class="form-group">
             <label for="input-email">SOC ANALYST EMAIL</label>
-            <input type="email" id="input-email" class="form-input" value="analyst@soc.microsoft.com" required>
+            <input type="email" id="input-email" class="form-input" placeholder="Enter your email" required>
           </div>
 
           <div class="form-group">
             <label for="input-password">PASSWORD</label>
-            <input type="password" id="input-password" class="form-input" value="SC200Pass2026!" required>
+            <input type="password" id="input-password" class="form-input" placeholder="Enter your password" required>
           </div>
 
           <button type="submit" class="btn-auth">Sign In to Assessment Hub &rarr;</button>
         </form>
 
-        <div class="demo-credentials">
-          <strong>PRE-LOADED DEMO CREDENTIALS:</strong><br>
-          • Student: analyst@soc.microsoft.com / SC200Pass2026!<br>
-          • Admin: admin@soc.microsoft.com / MasterAdmin2026!
-        </div>
       </div>
     </section>
 
@@ -104,8 +89,8 @@
         <div class="cert-card active-track" style="border-color: var(--accent-green);">
           <span class="cert-badge" style="background: rgba(16, 185, 129, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green);">🎯 PEARSON VUE REAL EXAM SIMULATOR</span>
           <div class="cert-title">Pearson VUE SC-200 Real Test Center Mode</div>
-          <div class="cert-desc">Authentic Pearson VUE exam environment with 50 randomized questions, AI camera invigilator monitoring, anti-cheat tab lock, and post-exam audio report.</div>
-          <button class="btn-primary" style="width: 100%; background: var(--accent-green); color: #000;" onclick="startPearsonVueExam()">Launch Pearson VUE Real Exam Simulation &rarr;</button>
+          <div class="cert-desc">Authentic Pearson VUE exam environment with 50 blueprint-weighted questions, AI camera invigilator monitoring, anti-cheat tab lock, and post-exam diagnostic report. Opens in a dedicated, locked-down test-center page.</div>
+          <button class="btn-primary" style="width: 100%; background: var(--accent-green); color: #000;" onclick="launchPearsonVue()">Launch Pearson VUE Real Exam Simulation &rarr;</button>
         </div>
 
         <div class="cert-card active-track">
@@ -278,70 +263,32 @@
       </div>
     </section>
 
-    <!-- VIEW 4: PEARSON VUE REAL EXAM SIMULATION PAGE -->
-    <section id="view-pearson-exam" class="view-panel">
-      <div class="pearson-header-bar">
-        <div class="pearson-candidate-info">
-          <strong>PEARSON VUE CERTIFICATION TEST CENTER</strong><br>
-          <span style="color: var(--text-muted); font-size: 11px;">Candidate: <span id="pearson-cand-id">analyst@soc.microsoft.com</span> | Exam: SC-200 Microsoft Security Operations Analyst</span>
-        </div>
-        <div class="pearson-timer-box">⏱️ <span id="lbl-pearson-timer">100:00</span></div>
-      </div>
-
-      <!-- Pearson Question Palette Grid -->
-      <div class="pearson-palette-grid" id="pearson-palette-container"></div>
-
-      <!-- Pearson Question Card -->
-      <div class="question-card" style="border-color: var(--pearson-accent);">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-family: var(--font-mono); font-size: 12px; color: var(--accent-cyan);">
-          <span id="lbl-pearson-qnum">Item 1 of 50</span>
-          <span id="lbl-pearson-modtag">Module: DEFENDER XDR</span>
-        </div>
-        <div class="scenario-box" id="lbl-pearson-scenario">Loading scenario...</div>
-        <div class="question-text" id="lbl-pearson-qtext">Loading prompt...</div>
-
-        <div class="options-list" id="container-pearson-options"></div>
-
-        <div class="quiz-actions-bar">
-          <div class="nav-buttons-group">
-            <button class="btn-secondary" onclick="prevPearsonQuestion()" id="btn-pearson-prev" disabled>&larr; Previous Item</button>
-            <button class="btn-secondary" onclick="flagPearsonQuestion()" id="btn-pearson-flag">🚩 Flag Item</button>
-          </div>
-          <div style="display: flex; gap: 10px;">
-            <button class="btn-secondary" onclick="finishPearsonExamPrompt()" style="border-color: var(--accent-yellow); color: var(--accent-yellow);">End Exam & Submit &rarr;</button>
-            <button class="btn-primary" onclick="nextPearsonQuestion()" id="btn-pearson-next">Next Item &rarr;</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- VIEW 5: PEARSON VUE POST-EXAM DIAGNOSTIC SCORE REPORT & READ ALOUD AUDIO -->
-    <section id="view-pearson-report" class="view-panel">
+    <!-- VIEW 6: PRACTICE MODE SUMMARY -->
+    <section id="view-summary" class="view-panel">
       <div class="summary-card" style="max-width: 900px;">
-        <h2 style="color: var(--accent-cyan);">Pearson VUE Diagnostic Score Report</h2>
-        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">SC-200 Microsoft Certified Security Operations Analyst Associate</p>
+        <h2 style="color: var(--accent-cyan);">Practice Session Complete</h2>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">SC-200 Domain Revision Assessment Results</p>
 
         <div class="score-circle">
-          <div class="score-number" id="lbl-pv-score-num">850</div>
+          <div class="score-number" id="lbl-score-num">0</div>
           <div class="score-total">/ 1000 score</div>
         </div>
 
-        <div class="pass-badge passed" id="badge-pv-pass-status">PASSED (Threshold: 700)</div>
+        <div class="pass-badge" id="badge-practice-pass">RESULT PENDING</div>
 
         <div style="text-align: left; margin: 20px 0;">
-          <h4 style="color: #fff; margin-bottom: 10px;">Domain Mastery Breakdown:</h4>
-          <div id="pv-domain-breakdown-list"></div>
+          <h4 style="color: #fff; margin-bottom: 10px;">Domain Breakdown:</h4>
+          <div id="practice-domain-breakdown"></div>
         </div>
 
-        <!-- Question-by-Question Review with Read Aloud Audio -->
         <div style="text-align: left; margin-top: 30px;">
-          <h3 style="color: #fff; margin-bottom: 16px;">🔍 Full Diagnostic Review & Read Aloud Audio:</h3>
-          <div id="pv-questions-review-list"></div>
+          <h3 style="color: #fff; margin-bottom: 16px;">Question Review:</h3>
+          <div id="practice-review-list"></div>
         </div>
 
         <div style="display: flex; justify-content: center; gap: 14px; margin-top: 30px; flex-wrap: wrap;">
           <button class="btn-secondary" onclick="showView('view-hub')">Back to Master Hub</button>
-          <button class="btn-primary" onclick="startPearsonVueExam()">Re-Take Pearson VUE Real Exam Simulation &rarr;</button>
+          <button class="btn-primary" onclick="openSC200Triage()">Start New Practice Session &rarr;</button>
         </div>
       </div>
     </section>
@@ -360,21 +307,29 @@
     let userAnswers = {};
     let verifiedQuestions = {};
     let flaggedQuestions = {};
-    let proctorStrikes = 0;
-    let proctorStream = null;
-    let proctorInterval = null;
     let speechUtterance = null;
     let isSpeechPlaying = false;
     let speechRate = 1.25;
     let timerInterval = null;
     let timeRemaining = 3600;
+    let shuffledOptionsMap = {}; // Tracks option shuffling per question
 
-    // Pearson VUE Specific State
-    let pearsonQuestions = [];
-    let pearsonIndex = 0;
-    let pearsonUserAnswers = {};
-    let pearsonFlagged = {};
-    let pearsonStartTime = 0;
+    // OPTION SHUFFLING ENGINE — randomizes A/B/C/D order per question
+    function shuffleQuestionOptions(q) {
+      if (shuffledOptionsMap[q.id]) return shuffledOptionsMap[q.id];
+      const indices = [0, 1, 2, 3];
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+      const shuffled = {
+        options: indices.map(i => q.options[i]),
+        correctIndex: indices.indexOf(q.correctIndex),
+        originalToShuffled: indices
+      };
+      shuffledOptionsMap[q.id] = shuffled;
+      return shuffled;
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
       checkAuth();
@@ -382,34 +337,43 @@
       initAntiCheatProtection();
     });
 
-    // ANTI-CHEAT TAB LOCK
+    // ANTI-CHEAT TAB LOCK (timed "Exam" revision submode only — no webcam here;
+    // full AI proctoring lives in the standalone pearson.html test-center page)
     function initAntiCheatProtection() {
+      const showFocusWarning = () => {
+        const banner = document.getElementById('proctor-warning');
+        banner.style.display = 'block';
+        setTimeout(() => { banner.style.display = 'none'; }, 4000);
+      };
+
       document.addEventListener('visibilitychange', () => {
-        if (document.hidden && (currentMode === 'exam' || currentMode === 'pearson')) {
-          triggerProctorWarning('Tab Switch / Window Focus Lost!');
-        }
+        if (document.hidden && currentMode === 'exam') showFocusWarning();
       });
 
       window.addEventListener('blur', () => {
-        if (currentMode === 'exam' || currentMode === 'pearson') {
-          triggerProctorWarning('Browser Window Focus Lost!');
-        }
+        if (currentMode === 'exam') showFocusWarning();
       });
 
       document.addEventListener('contextmenu', e => {
-        if (currentMode === 'exam' || currentMode === 'pearson') e.preventDefault();
+        if (currentMode === 'exam') e.preventDefault();
       });
 
       document.addEventListener('copy', e => {
-        if (currentMode === 'exam' || currentMode === 'pearson') {
+        if (currentMode === 'exam') {
           e.preventDefault();
           alert('Copying exam questions is disabled to protect question bank security.');
         }
       });
 
       document.addEventListener('selectstart', e => {
-        if (currentMode === 'exam' || currentMode === 'pearson') e.preventDefault();
+        if (currentMode === 'exam') e.preventDefault();
       });
+    }
+
+    // Opens the standalone, locked-down Pearson VUE test-center page.
+    // currentUser is already in localStorage under 'sc200_user' — pearson.html reads it from there.
+    function launchPearsonVue() {
+      window.location.href = 'pearson.html';
     }
 
     function showView(viewId) {
@@ -470,7 +434,6 @@
     function logout() {
       localStorage.removeItem('sc200_user');
       currentUser = null;
-      stopProctoring();
       document.getElementById('lbl-user-email').style.display = 'none';
       document.getElementById('btn-hdr-dash').style.display = 'none';
       document.getElementById('btn-logout').style.display = 'none';
@@ -539,335 +502,54 @@
       document.getElementById('mode-exam').classList.toggle('active', mode === 'exam');
     }
 
-    // WEBCAM AI INVIGILATOR ENGINE
-    async function initProctoring() {
-      proctorStrikes = 0;
-      document.getElementById('lbl-strikes').innerText = `STRIKES: 0/3`;
-      document.getElementById('proctor-warning').style.display = 'none';
-
-      try {
-        proctorStream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } });
-        const video = document.getElementById('proctor-video');
-        video.srcObject = proctorStream;
-        document.getElementById('proctor-hud').classList.add('active');
-        document.getElementById('proctor-status').innerText = 'AI PROCTOR: ACTIVE';
-        startProctorAnalyzer();
-      } catch (err) {
-        console.warn('Webcam permission denied or missing hardware:', err);
-        document.getElementById('proctor-hud').classList.add('active');
-        document.getElementById('proctor-status').innerText = 'PROCTOR: SIMULATED (No Cam)';
-      }
-    }
-
-    function startProctorAnalyzer() {
-      const video = document.getElementById('proctor-video');
-      const canvas = document.getElementById('proctor-canvas');
-      const ctx = canvas.getContext('2d');
-
-      clearInterval(proctorInterval);
-      proctorInterval = setInterval(() => {
-        if (!video.videoWidth) return;
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        let totalLuma = 0;
-        for (let i = 0; i < imgData.data.length; i += 16) {
-          totalLuma += (imgData.data[i] + imgData.data[i+1] + imgData.data[i+2]) / 3;
-        }
-        const avgLuma = totalLuma / (imgData.data.length / 16);
-
-        if (avgLuma < 15 && Math.random() < 0.2) {
-          triggerProctorWarning('Camera Obscured or Low Light');
-        }
-      }, 5000);
-    }
-
-    function triggerProctorWarning(reason) {
-      proctorStrikes++;
-      document.getElementById('lbl-strikes').innerText = `STRIKES: ${proctorStrikes}/3`;
-      const banner = document.getElementById('proctor-warning');
-      banner.innerText = `⚠️ PROCTOR WARNING: ${reason}`;
-      banner.style.display = 'block';
-
-      if (currentUser) {
-        fetch('/api/proctor/log', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userEmail: currentUser.email, eventType: 'STRIKE', details: reason })
-        }).catch(() => {});
-      }
-
-      if (proctorStrikes >= 3) {
-        alert('Assessment paused by AI Invigilator due to multiple proctoring rule violations (3 Strikes).');
-      }
-    }
-
-    function stopProctoring() {
-      clearInterval(proctorInterval);
-      if (proctorStream) {
-        proctorStream.getTracks().forEach(t => t.stop());
-        proctorStream = null;
-      }
-      document.getElementById('proctor-hud').classList.remove('active');
-    }
-
-    // PEARSON VUE REAL EXAM SIMULATION LAUNCHER (DYNAMIC RANDOM SHUFFLE)
-    function startPearsonVueExam() {
-      currentMode = 'pearson';
-      
-      // Draw 50 questions (10 per module) randomly shuffled from 500 pool
-      const modules = ['xdr', 'copilot', 'purview', 'mde', 'mdc'];
-      let pool = [];
-      modules.forEach(m => {
-        const modQs = SC200_QUESTIONS.filter(q => q.module === m);
-        pool = pool.concat(modQs.sort(() => Math.random() - 0.5).slice(0, 10));
-      });
-
-      // DYNAMIC SHUFFLE ON EVERY RUN
-      pearsonQuestions = pool.sort(() => Math.random() - 0.5);
-      pearsonIndex = 0;
-      pearsonUserAnswers = {};
-      pearsonFlagged = {};
-      pearsonStartTime = Date.now();
-
-      document.getElementById('pearson-cand-id').innerText = currentUser ? currentUser.email : 'analyst@soc.microsoft.com';
-      document.getElementById('btn-global-quit').style.display = 'inline-flex';
-
-      showView('view-pearson-exam');
-      initProctoring();
-      startTimer(100 * 60);
-
-      renderPearsonPalette();
-      renderPearsonCurrentQuestion();
-    }
-
-    function renderPearsonPalette() {
-      const container = document.getElementById('pearson-palette-container');
-      container.innerHTML = '';
-      pearsonQuestions.forEach((q, idx) => {
-        const btn = document.createElement('button');
-        btn.className = 'palette-btn';
-        if (idx === pearsonIndex) btn.classList.add('active');
-        if (pearsonUserAnswers[q.id] !== undefined) btn.classList.add('answered');
-        if (pearsonFlagged[q.id]) btn.classList.add('flagged');
-        btn.innerText = idx + 1;
-        btn.onclick = () => {
-          pearsonIndex = idx;
-          renderPearsonPalette();
-          renderPearsonCurrentQuestion();
-        };
-        container.appendChild(btn);
-      });
-    }
-
-    function renderPearsonCurrentQuestion() {
-      stopAudioExplanation();
-      const q = pearsonQuestions[pearsonIndex];
-
-      document.getElementById('lbl-pearson-qnum').innerText = `Item ${pearsonIndex + 1} of ${pearsonQuestions.length}`;
-      document.getElementById('lbl-pearson-modtag').innerText = `Module: ${q.module.toUpperCase()}`;
-      document.getElementById('lbl-pearson-scenario').innerText = q.scenario;
-      document.getElementById('lbl-pearson-qtext').innerText = q.question;
-
-      document.getElementById('btn-pearson-prev').disabled = (pearsonIndex === 0);
-      document.getElementById('btn-pearson-flag').innerText = pearsonFlagged[q.id] ? '🚩 Flagged Item' : '🚩 Flag Item';
-
-      const container = document.getElementById('container-pearson-options');
-      container.innerHTML = '';
-
-      q.options.forEach((opt, idx) => {
-        const letter = String.fromCharCode(65 + idx);
-        const item = document.createElement('div');
-        item.className = 'option-item';
-        if (pearsonUserAnswers[q.id] === idx) item.classList.add('selected');
-
-        item.onclick = () => selectPearsonOption(idx);
-        item.innerHTML = `
-          <div class="option-letter">${letter}</div>
-          <div class="option-label-text">${opt}</div>
-        `;
-        container.appendChild(item);
-      });
-    }
-
-    function selectPearsonOption(idx) {
-      const q = pearsonQuestions[pearsonIndex];
-      pearsonUserAnswers[q.id] = idx;
-      renderPearsonPalette();
-      renderPearsonCurrentQuestion();
-    }
-
-    function flagPearsonQuestion() {
-      const q = pearsonQuestions[pearsonIndex];
-      pearsonFlagged[q.id] = !pearsonFlagged[q.id];
-      renderPearsonPalette();
-      renderPearsonCurrentQuestion();
-    }
-
-    function prevPearsonQuestion() {
-      if (pearsonIndex > 0) {
-        pearsonIndex--;
-        renderPearsonPalette();
-        renderPearsonCurrentQuestion();
-      }
-    }
-
-    function nextPearsonQuestion() {
-      if (pearsonIndex < pearsonQuestions.length - 1) {
-        pearsonIndex++;
-        renderPearsonPalette();
-        renderPearsonCurrentQuestion();
-      } else {
-        finishPearsonExamPrompt();
-      }
-    }
-
-    function finishPearsonExamPrompt() {
-      const answeredCount = Object.keys(pearsonUserAnswers).length;
-      if (confirm(`You have answered ${answeredCount} of ${pearsonQuestions.length} items. Are you sure you want to end your Pearson VUE exam and view your score report?`)) {
-        finishPearsonExam();
-      }
-    }
-
-    // PEARSON VUE DIAGNOSTIC REPORT & READ ALOUD ENGINE
-    function finishPearsonExam() {
-      stopAudioExplanation();
-      stopProctoring();
-      clearInterval(timerInterval);
-
-      const timeSpentSec = Math.round((Date.now() - pearsonStartTime) / 1000);
-      let correctCount = 0;
-      const domainStats = { xdr: { c: 0, t: 0 }, copilot: { c: 0, t: 0 }, purview: { c: 0, t: 0 }, mde: { c: 0, t: 0 }, mdc: { c: 0, t: 0 } };
-
-      pearsonQuestions.forEach(q => {
-        domainStats[q.module].t++;
-        if (pearsonUserAnswers[q.id] === q.correctIndex) {
-          correctCount++;
-          domainStats[q.module].c++;
-        }
-      });
-
-      const finalScore = Math.round((correctCount / pearsonQuestions.length) * 1000);
-      const isPassed = finalScore >= 700;
-
-      document.getElementById('lbl-pv-score-num').innerText = finalScore;
-      const badge = document.getElementById('badge-pv-pass-status');
-      badge.className = `pass-badge ${isPassed ? 'passed' : 'failed'}`;
-      badge.innerText = isPassed ? 'PASSED (Pearson VUE Threshold: 700)' : 'FAILED (Pearson VUE Threshold: 700)';
-
-      let breakdownHTML = '';
-      Object.keys(domainStats).forEach(mod => {
-        if (domainStats[mod].t > 0) {
-          const pct = Math.round((domainStats[mod].c / domainStats[mod].t) * 100);
-          breakdownHTML += `
-            <div style="margin-bottom: 10px;">
-              <div style="display:flex; justify-content:space-between; font-size:12px; font-family:var(--font-mono); margin-bottom:4px;">
-                <span>${mod.toUpperCase()} (${domainStats[mod].c}/${domainStats[mod].t})</span>
-                <span>${pct}%</span>
-              </div>
-              <div style="height:6px; background:var(--bg-dark); border-radius:3px; overflow:hidden;">
-                <div style="width:${pct}%; height:100%; background:${pct >= 70 ? 'var(--accent-green)' : 'var(--accent-red)'};"></div>
-              </div>
-            </div>
-          `;
-        }
-      });
-      document.getElementById('pv-domain-breakdown-list').innerHTML = breakdownHTML;
-
-      // Render Question-by-Question Review with Read Aloud Audio
-      let reviewHTML = '';
-      pearsonQuestions.forEach((q, i) => {
-        const uAns = pearsonUserAnswers[q.id];
-        const isCorrect = (uAns === q.correctIndex);
-        const exp = q.explanation;
-
-        let optListHTML = '<ul style="list-style:none; padding:0; margin-top:8px;">';
-        exp.analysis.forEach(line => {
-          const isC = line.startsWith('CORRECT');
-          optListHTML += `<li style="margin-bottom:6px; font-size:13px; color:${isC ? 'var(--accent-green)' : 'var(--text-muted)'}">${line}</li>`;
-        });
-        optListHTML += '</ul>';
-
-        reviewHTML += `
-          <div class="report-q-card">
-            <div class="report-q-header">
-              <span class="report-q-tag ${isCorrect ? 'correct' : 'incorrect'}">Q${i + 1} [${q.module.toUpperCase()}] - ${isCorrect ? '✅ CORRECT' : '❌ INCORRECT'}</span>
-              <button class="btn-read-aloud" onclick="readAloudQuestionAudio('${q.id}')">🔊 Read Aloud</button>
-            </div>
-            <div style="font-weight:600; color:#fff; font-size:15px; margin-bottom:6px;">${q.question}</div>
-            <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;"><strong>Scenario:</strong> ${q.scenario}</div>
-            
-            <div style="font-size:13px; margin-bottom:8px;">
-              <strong>Your Choice:</strong> ${uAns !== undefined ? String.fromCharCode(65 + uAns) + '. ' + q.options[uAns] : 'Not Answered'} | 
-              <strong style="color:var(--accent-green);">Correct Choice: Option ${String.fromCharCode(65 + q.correctIndex)}</strong>
-            </div>
-
-            <div style="background:rgba(15,23,42,0.8); border:1px solid var(--border-color); border-radius:6px; padding:12px; margin-top:10px;">
-              <strong style="color:var(--accent-cyan); font-size:13px;">Why Choice is Right & What is Wrong with Others:</strong>
-              ${optListHTML}
-              <div style="margin-top:8px; font-size:12px; font-family:var(--font-mono); color:#a5f3fc;">KQL: ${exp.codeSnippet}</div>
-            </div>
-          </div>
-        `;
-      });
-
-      document.getElementById('pv-questions-review-list').innerHTML = reviewHTML;
-
-      // Save attempt to SQLite via REST API
-      if (currentUser) {
-        fetch('/api/pearson/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userEmail: currentUser.email,
-            examCode: 'SC-200',
-            score: finalScore,
-            totalQuestions: pearsonQuestions.length,
-            correctQuestions: correctCount,
-            domainStats: domainStats,
-            userAnswers: pearsonUserAnswers,
-            proctorStrikes: proctorStrikes,
-            timeSpentSeconds: timeSpentSec
-          })
-        }).catch(err => console.warn('SQLite save offline:', err));
-      }
-
-      showView('view-pearson-report');
-    }
-
-    function readAloudQuestionAudio(qId) {
-      const q = SC200_QUESTIONS.find(x => x.id === qId);
-      if (q) {
-        const textToRead = `Question: ${q.question}. ${q.audioSummary}`;
-        triggerAudioExplanation(textToRead);
-      }
-    }
-
     // DOMAIN REVISION PRACTICE FUNCTIONS
+
+    // Fisher-Yates shuffle to pick a true random sample from a pool each session
+    function sampleRandom(arr, n) {
+      const copy = arr.slice();
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy.slice(0, n);
+    }
+
     function startAssessment() {
-      currentMode = 'practice';
+      // Preserve the mode the user toggled (practice vs exam) — don't overwrite it.
+      if (currentMode !== 'exam') currentMode = 'practice';
+
       const limitVal = document.getElementById('select-limit').value;
       let pool = [];
 
       selectedModules.forEach(mod => {
         const modQs = SC200_QUESTIONS.filter(q => q.module === mod);
         if (limitVal === 'all') pool = pool.concat(modQs);
-        else pool = pool.concat(modQs.slice(0, parseInt(limitVal, 10)));
+        else pool = pool.concat(sampleRandom(modQs, parseInt(limitVal, 10)));
       });
 
-      activeQuestions = pool.sort(() => Math.random() - 0.5).filter(q => selectedModules.includes(q.module));
+      // Shuffle the combined pool for display order
+      activeQuestions = sampleRandom(pool, pool.length);
       currentIndex = 0;
       userAnswers = {};
       verifiedQuestions = {};
       flaggedQuestions = {};
+      shuffledOptionsMap = {}; // Reset option shuffling for new session
 
       showView('view-quiz');
       document.getElementById('btn-global-quit').style.display = 'inline-flex';
       document.getElementById('btn-hdr-reset').style.display = 'inline-flex';
       document.getElementById('session-dot').classList.add('active');
-      document.getElementById('session-text').innerText = `Active Session: PRACTICE (${activeQuestions.length} Qs)`;
+
+      // Exam sub-mode: show timer and start countdown (60 min timed revision drill)
+      if (currentMode === 'exam') {
+        document.getElementById('box-timer').style.display = 'inline-flex';
+        startTimer(3600); // 60 minutes for a timed revision drill
+        document.getElementById('session-text').innerText = `Active Session: EXAM DRILL (${activeQuestions.length} Qs)`;
+      } else {
+        document.getElementById('box-timer').style.display = 'none';
+        clearInterval(timerInterval);
+        document.getElementById('session-text').innerText = `Active Session: PRACTICE (${activeQuestions.length} Qs)`;
+      }
 
       renderCurrentQuestion();
     }
@@ -883,24 +565,25 @@
       const container = document.getElementById('container-options');
       container.innerHTML = '';
 
+      const shuffled = shuffleQuestionOptions(q);
       const isVerified = verifiedQuestions[q.id] === true;
       const feedbackBanner = document.getElementById('banner-answer-feedback');
 
       if (isVerified) {
-        const isCorrect = (userAnswers[q.id] === q.correctIndex);
+        const isCorrect = (userAnswers[q.id] === shuffled.correctIndex);
         feedbackBanner.style.display = 'flex';
         feedbackBanner.className = `answer-feedback-banner ${isCorrect ? 'correct' : 'incorrect'}`;
-        feedbackBanner.innerHTML = isCorrect ? '<span>✅ CORRECT ANSWER! Excellent SOC Decision.</span>' : `<span>❌ WRONG ANSWER! Correct Choice is Option ${String.fromCharCode(65 + q.correctIndex)}.</span>`;
+        feedbackBanner.innerHTML = isCorrect ? '<span>✅ CORRECT ANSWER! Excellent SOC Decision.</span>' : `<span>❌ WRONG ANSWER! Correct Choice is Option ${String.fromCharCode(65 + shuffled.correctIndex)}.</span>`;
       } else {
         feedbackBanner.style.display = 'none';
       }
 
-      q.options.forEach((opt, idx) => {
+      shuffled.options.forEach((opt, idx) => {
         const item = document.createElement('div');
         item.className = 'option-item';
         if (userAnswers[q.id] === idx) item.classList.add('selected');
         if (isVerified) {
-          if (idx === q.correctIndex) item.classList.add('correct');
+          if (idx === shuffled.correctIndex) item.classList.add('correct');
           else if (userAnswers[q.id] === idx) item.classList.add('incorrect');
         }
         item.onclick = () => selectOption(idx);
@@ -955,14 +638,15 @@
 
     function verifyAnswerUI() {
       const q = activeQuestions[currentIndex];
-      const isCorrect = (userAnswers[q.id] === q.correctIndex);
+      const shuffled = shuffleQuestionOptions(q);
+      const isCorrect = (userAnswers[q.id] === shuffled.correctIndex);
       const feedbackBanner = document.getElementById('banner-answer-feedback');
       feedbackBanner.style.display = 'flex';
       feedbackBanner.className = `answer-feedback-banner ${isCorrect ? 'correct' : 'incorrect'}`;
-      feedbackBanner.innerHTML = isCorrect ? '<span>✅ CORRECT ANSWER! Excellent SOC Decision.</span>' : `<span>❌ WRONG ANSWER! Correct Choice is Option ${String.fromCharCode(65 + q.correctIndex)}.</span>`;
+      feedbackBanner.innerHTML = isCorrect ? '<span>✅ CORRECT ANSWER! Excellent SOC Decision.</span>' : `<span>❌ WRONG ANSWER! Correct Choice is Option ${String.fromCharCode(65 + shuffled.correctIndex)}.</span>`;
 
       document.querySelectorAll('.option-item').forEach((item, i) => {
-        if (i === q.correctIndex) item.classList.add('correct');
+        if (i === shuffled.correctIndex) item.classList.add('correct');
         else if (userAnswers[q.id] === i) item.classList.add('incorrect');
       });
 
@@ -1024,13 +708,11 @@
         const secs = timeRemaining % 60;
         const timeStr = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
         if (document.getElementById('lbl-timer')) document.getElementById('lbl-timer').innerText = timeStr;
-        if (document.getElementById('lbl-pearson-timer')) document.getElementById('lbl-pearson-timer').innerText = timeStr;
 
         if (timeRemaining <= 0) {
           clearInterval(timerInterval);
           alert('Time limit reached!');
-          if (currentMode === 'pearson') finishPearsonExam();
-          else finishAssessment();
+          finishAssessment();
         }
       }, 1000);
     }
@@ -1038,22 +720,62 @@
     function restartAssessment() {
       if (confirm('Reset session progress?')) {
         stopAudioExplanation();
-        userAnswers = {}; verifiedQuestions = {}; flaggedQuestions = {}; currentIndex = 0; renderCurrentQuestion();
+        userAnswers = {}; verifiedQuestions = {}; flaggedQuestions = {}; shuffledOptionsMap = {}; currentIndex = 0; renderCurrentQuestion();
       }
     }
 
     function quitAssessment() {
       if (confirm('Quit to master hub?')) {
-        stopAudioExplanation(); stopProctoring(); clearInterval(timerInterval); showView('view-hub');
+        stopAudioExplanation(); clearInterval(timerInterval); showView('view-hub');
       }
     }
 
     function finishAssessment() {
-      stopAudioExplanation(); stopProctoring(); clearInterval(timerInterval);
+      stopAudioExplanation(); clearInterval(timerInterval);
       let correctCount = 0;
-      activeQuestions.forEach(q => { if (userAnswers[q.id] === q.correctIndex) correctCount++; });
+      const domainStats = {};
+      activeQuestions.forEach(q => {
+        const shuffled = shuffleQuestionOptions(q);
+        if (!domainStats[q.module]) domainStats[q.module] = { c: 0, t: 0 };
+        domainStats[q.module].t++;
+        if (userAnswers[q.id] === shuffled.correctIndex) {
+          correctCount++;
+          domainStats[q.module].c++;
+        }
+      });
       const finalScore = Math.round((correctCount / activeQuestions.length) * 1000);
+      const isPassed = finalScore >= 700;
+
       document.getElementById('lbl-score-num').innerText = finalScore;
+      const badge = document.getElementById('badge-practice-pass');
+      badge.className = `pass-badge ${isPassed ? 'passed' : 'failed'}`;
+      badge.innerText = isPassed ? 'PASSED (Threshold: 700)' : 'FAILED (Threshold: 700)';
+
+      // Domain breakdown
+      let breakdownHTML = '';
+      Object.keys(domainStats).forEach(mod => {
+        const pct = Math.round((domainStats[mod].c / domainStats[mod].t) * 100);
+        breakdownHTML += `<div style="margin-bottom: 10px;"><div style="display:flex;justify-content:space-between;font-size:12px;font-family:var(--font-mono);margin-bottom:4px;"><span>${mod.toUpperCase()} (${domainStats[mod].c}/${domainStats[mod].t})</span><span>${pct}%</span></div><div style="height:6px;background:var(--bg-dark);border-radius:3px;overflow:hidden;"><div style="width:${pct}%;height:100%;background:${pct >= 70 ? 'var(--accent-green)' : 'var(--accent-red)'};"></div></div></div>`;
+      });
+      document.getElementById('practice-domain-breakdown').innerHTML = breakdownHTML;
+
+      // Question review
+      let reviewHTML = '';
+      activeQuestions.forEach((q, i) => {
+        const shuffled = shuffleQuestionOptions(q);
+        const uAns = userAnswers[q.id];
+        const isCorrect = (uAns === shuffled.correctIndex);
+        reviewHTML += `<div class="report-q-card"><div class="report-q-header"><span class="report-q-tag ${isCorrect ? 'correct' : 'incorrect'}">Q${i+1} [${q.module.toUpperCase()}] - ${isCorrect ? '✅ CORRECT' : '❌ INCORRECT'}</span></div><div style="font-weight:600;color:#fff;font-size:14px;margin-bottom:6px;">${q.question}</div><div style="font-size:13px;margin-bottom:6px;"><strong>Your Choice:</strong> ${uAns !== undefined ? String.fromCharCode(65+uAns)+'. '+shuffled.options[uAns] : 'Not Answered'} | <strong style="color:var(--accent-green);">Correct: ${String.fromCharCode(65+shuffled.correctIndex)}. ${shuffled.options[shuffled.correctIndex]}</strong></div></div>`;
+      });
+      document.getElementById('practice-review-list').innerHTML = reviewHTML;
+
+      // Save to SQLite
+      if (currentUser) {
+        fetch('/api/session/submit', {
+          method: 'POST', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({userEmail:currentUser.email, examCode:'SC-200', mode:'practice', score:finalScore, totalQuestions:activeQuestions.length, correctQuestions:correctCount, domainStats:domainStats})
+        }).catch(() => {});
+      }
       showView('view-summary');
     }
 
